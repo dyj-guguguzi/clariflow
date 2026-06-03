@@ -1,0 +1,88 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: clariflow-workitem-flow
+
+  # H2 Database Configuration
+  datasource:
+    url: jdbc:h2:file:./data/clariflow;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # Redis Configuration (Docker: redis hostname, fallback to localhost)
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout: 3000ms
+    connect-timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: 3000ms
+
+  # H2 Console (dev debugging)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # SQL initialization (idempotent: MERGE INTO in data.sql)
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+
+  # Jackson configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd'T'HH:mm:ss
+
+# MyBatis-Plus Configuration
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:mapper/**/*.xml
+
+# Knife4j OpenAPI3 Configuration
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN
+    swagger-model-name: ClariFlow API
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  packages-to-scan: com.clariflow.workflow.controller
+
+# ClariFlow AI Configuration
+clariflow:
+  ai:
+    # provider: mock | deepseek
+    provider: deepseek
+    deepseek:
+      api-key: ${DEEPSEEK_API_KEY:your-api-key-here}
+      base-url: https://api.deepseek.com
+      model: deepseek-chat

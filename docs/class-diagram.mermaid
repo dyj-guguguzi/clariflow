@@ -1,0 +1,258 @@
+classDiagram
+    direction TB
+
+    %% ── 枚举 ──
+    class WorkItemType {
+        <<enumeration>>
+        STORY
+        BUG
+        TASK
+    }
+    class Priority {
+        <<enumeration>>
+        P0
+        P1
+        P2
+    }
+    class WorkItemStatus {
+        <<enumeration>>
+        DRAFT
+        ANALYZING
+        READY
+        IN_DEVELOPMENT
+        TESTING
+        COMPLETED
+        +canTransitionTo(WorkItemStatus target) boolean$
+        +getAllowedTargets() List~WorkItemStatus~$
+    }
+    class Severity {
+        <<enumeration>>
+        HIGH
+        MEDIUM
+        LOW
+    }
+    class ClarificationStatus {
+        <<enumeration>>
+        UNRESOLVED
+        RESOLVED
+    }
+
+    %% ── 数据库实体 ──
+    class WorkItem {
+        -String id
+        -String title
+        -String description
+        -WorkItemType type
+        -Priority priority
+        -WorkItemStatus status
+        -String assignee
+        -List~String~ tags
+        -List~String~ acceptanceCriteria
+        -Severity riskLevel
+        -Integer version
+        -LocalDateTime createdAt
+        -LocalDateTime updatedAt
+    }
+
+    class WorkItemTransition {
+        -Long id
+        -String workItemId
+        -WorkItemStatus fromStatus
+        -WorkItemStatus toStatus
+        -String reason
+        -String operator
+        -LocalDateTime createdAt
+    }
+
+    class Clarification {
+        -Long id
+        -String workItemId
+        -String question
+        -Severity severity
+        -ClarificationStatus status
+        -String answer
+        -LocalDateTime createdAt
+        -LocalDateTime resolvedAt
+    }
+
+    %% ── 请求 DTO ──
+    class WorkItemCreateRequest {
+        +String title
+        +String description
+        +WorkItemType type
+        +Priority priority
+        +String assignee
+        +List~String~ tags
+        +List~String~ acceptanceCriteria
+        +Severity riskLevel
+    }
+
+    class WorkItemUpdateRequest {
+        +String title
+        +String description
+        +WorkItemType type
+        +Priority priority
+        +String assignee
+        +List~String~ tags
+        +List~String~ acceptanceCriteria
+        +Severity riskLevel
+        +Integer version
+    }
+
+    class TransitionRequest {
+        +WorkItemStatus targetStatus
+        +String reason
+        +String operator
+    }
+
+    class ClarificationCreateRequest {
+        +String question
+        +Severity severity
+    }
+
+    class ClarificationResolveRequest {
+        +String answer
+    }
+
+    %% ── 响应 DTO ──
+    class ApiResponse~T~ {
+        +Integer code
+        +String message
+        +T data
+        +long timestamp
+        +success(T data)$ ApiResponse~T~
+        +error(Integer code, String message)$ ApiResponse~Void~
+    }
+
+    class WorkItemResponse {
+        +String id
+        +String title
+        +String description
+        +WorkItemType type
+        +Priority priority
+        +WorkItemStatus status
+        +String assignee
+        +List~String~ tags
+        +List~String~ acceptanceCriteria
+        +Severity riskLevel
+        +Integer version
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
+        +List~ClarificationResponse~ clarifications
+        +List~TransitionResponse~ transitions
+        +AIAnalysisResponse aiAnalysis
+    }
+
+    class WorkItemListItemResponse {
+        +String id
+        +String title
+        +WorkItemType type
+        +Priority priority
+        +WorkItemStatus status
+        +String assignee
+        +Severity riskLevel
+        +LocalDateTime updatedAt
+    }
+
+    class TransitionResponse {
+        +Long id
+        +String workItemId
+        +WorkItemStatus fromStatus
+        +WorkItemStatus toStatus
+        +String reason
+        +String operator
+        +LocalDateTime createdAt
+    }
+
+    class ClarificationResponse {
+        +Long id
+        +String workItemId
+        +String question
+        +Severity severity
+        +ClarificationStatus status
+        +String answer
+        +LocalDateTime createdAt
+        +LocalDateTime resolvedAt
+    }
+
+    class AIAnalysisResponse {
+        +String summary
+        +List~RiskItem~ risks
+        +List~String~ suggestions
+        +LocalDateTime analyzedAt
+    }
+
+    class RiskItem {
+        +Severity level
+        +String description
+    }
+
+    %% ── Service 接口 ──
+    class WorkItemService {
+        <<interface>>
+        +createWorkItem(WorkItemCreateRequest req) WorkItemResponse
+        +getWorkItem(String id) WorkItemResponse
+        +listWorkItems(String type, String priority, String status) List~WorkItemListItemResponse~
+        +updateWorkItem(String id, WorkItemUpdateRequest req) WorkItemResponse
+    }
+
+    class TransitionService {
+        <<interface>>
+        +executeTransition(String workItemId, TransitionRequest req) WorkItemResponse
+        +getTransitionHistory(String workItemId) List~TransitionResponse~
+    }
+
+    class ClarificationService {
+        <<interface>>
+        +addClarification(String workItemId, ClarificationCreateRequest req) ClarificationResponse
+        +getClarifications(String workItemId) List~ClarificationResponse~
+        +resolveClarification(String workItemId, Long clarificationId, ClarificationResolveRequest req) ClarificationResponse
+    }
+
+    class AIAnalysisService {
+        <<interface>>
+        +analyze(String workItemId) AIAnalysisResponse
+    }
+
+    class MockAIAnalysisService {
+        +analyze(String workItemId) AIAnalysisResponse
+    }
+
+    %% ── 关系 ──
+    WorkItem --> WorkItemType : type
+    WorkItem --> Priority : priority
+    WorkItem --> WorkItemStatus : status
+    WorkItem --> Severity : riskLevel
+    WorkItemTransition --> WorkItemStatus : fromStatus, toStatus
+    Clarification --> Severity : severity
+    Clarification --> ClarificationStatus : status
+
+    WorkItem "1" -- "0..*" WorkItemTransition : has history
+    WorkItem "1" -- "0..*" Clarification : has clarifications
+
+    WorkItemCreateRequest --> WorkItemType
+    WorkItemCreateRequest --> Priority
+    WorkItemCreateRequest --> Severity
+    WorkItemUpdateRequest --> WorkItemType
+    WorkItemUpdateRequest --> Priority
+    WorkItemUpdateRequest --> Severity
+    TransitionRequest --> WorkItemStatus
+    ClarificationCreateRequest --> Severity
+
+    WorkItemResponse --> WorkItemType
+    WorkItemResponse --> Priority
+    WorkItemResponse --> WorkItemStatus
+    WorkItemResponse --> Severity
+    WorkItemResponse *-- "0..*" ClarificationResponse
+    WorkItemResponse *-- "0..*" TransitionResponse
+    WorkItemResponse *-- "0..1" AIAnalysisResponse
+    AIAnalysisResponse *-- "0..*" RiskItem
+    RiskItem --> Severity
+
+    AIAnalysisService <|.. MockAIAnalysisService : implements
+
+    WorkItemService --> WorkItemResponse
+    WorkItemService --> WorkItemListItemResponse
+    TransitionService --> TransitionResponse
+    ClarificationService --> ClarificationResponse
+    AIAnalysisService --> AIAnalysisResponse

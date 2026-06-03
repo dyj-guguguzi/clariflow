@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClariFlow — 工作项状态流转</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+            background: #f0f2f5; color: #333; min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        header h1 { font-size: 1.4rem; font-weight: 600; }
+        header button {
+            background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s;
+        }
+        header button:hover { background: rgba(255,255,255,0.35); }
+        .container { display: flex; height: calc(100vh - 64px); }
+        .panel-left { width: 380px; min-width: 320px; background: #fff; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; }
+        .panel-right { flex: 1; overflow-y: auto; padding: 24px; }
+        .filters { padding: 16px; border-bottom: 1px solid #e0e0e0; display: flex; gap: 8px; flex-wrap: wrap; }
+        .filters select { flex: 1; min-width: 80px; padding: 6px 10px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 0.85rem; background: #fff; }
+        .item-list { flex: 1; overflow-y: auto; }
+        .item-card { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s; }
+        .item-card:hover { background: #f5f8ff; }
+        .item-card.active { background: #e8f0fe; border-left: 3px solid #1a73e8; }
+        .item-card .title { font-size: 0.95rem; font-weight: 500; margin-bottom: 6px; }
+        .item-card .meta { display: flex; gap: 8px; font-size: 0.78rem; color: #888; flex-wrap: wrap; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 500; }
+        .badge-需求 { background: #e3f2fd; color: #1565c0; }
+        .badge-缺陷 { background: #fce4ec; color: #c62828; }
+        .badge-任务 { background: #e8f5e9; color: #2e7d32; }
+        .badge-草稿 { background: #f5f5f5; color: #616161; }
+        .badge-分析中 { background: #fff3e0; color: #e65100; }
+        .badge-已准备 { background: #e8f5e9; color: #2e7d32; }
+        .badge-开发中 { background: #e3f2fd; color: #1565c0; }
+        .badge-测试中 { background: #f3e5f5; color: #6a1b9a; }
+        .badge-已完成 { background: #e0f2f1; color: #00695c; }
+        .badge-p0 { background: #ffebee; color: #b71c1c; }
+        .badge-p1 { background: #fff3e0; color: #e65100; }
+        .badge-p2 { background: #f5f5f5; color: #757575; }
+        .badge-高 { background: #ffebee; color: #b71c1c; }
+        .badge-中 { background: #fff3e0; color: #e65100; }
+        .badge-低 { background: #e8f5e9; color: #2e7d32; }
+        .detail-empty { text-align: center; color: #aaa; padding-top: 100px; font-size: 1rem; }
+        .detail-section { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .detail-section h3 { font-size: 1rem; margin-bottom: 12px; color: #555; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .detail-field { margin-bottom: 10px; display: flex; }
+        .detail-field label { width: 80px; flex-shrink: 0; font-size: 0.82rem; color: #888; }
+        .detail-field span { font-size: 0.9rem; }
+        .transition-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+        .btn-transition { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+        .btn-transition:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        .btn-forward { background: #1a73e8; color: #fff; }
+        .btn-back { background: #f5f5f5; color: #555; border: 1px solid #d0d0d0; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.82rem; color: #666; margin-bottom: 4px; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 0.9rem; font-family: inherit; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-row { display: flex; gap: 12px; }
+        .form-row .form-group { flex: 1; }
+        .btn-primary { background: #1a73e8; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .btn-primary:hover { background: #1557b0; }
+        .btn-secondary { background: #fff; color: #555; border: 1px solid #d0d0d0; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 100; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 10px; padding: 24px; width: 560px; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+        .modal h3 { margin-bottom: 16px; }
+        .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 6px; color: #fff; font-size: 0.9rem; z-index: 200; animation: slideIn 0.3s ease; }
+        .toast-success { background: #2e7d32; }
+        .toast-error { background: #c62828; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .ai-panel { display: none; margin-top: 12px; padding: 16px; background: #f8f9ff; border-radius: 8px; border: 1px solid #d0d8f0; }
+        .ai-panel.show { display: block; }
+        .risk-item { padding: 6px 0; border-bottom: 1px solid #eee; }
+        .risk-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ClariFlow — 工作项状态流转</h1>
+    <button onclick="openCreateModal()">+ 新建工作项</button>
+</header>
+
+<div class="container">
+    <div class="panel-left">
+        <div class="filters">
+            <select id="filterType" onchange="loadList()">
+                <option value="">全部类型</option>
+                <option value="STORY">需求</option>
+                <option value="BUG">缺陷</option>
+                <option value="TASK">任务</option>
+            </select>
+            <select id="filterPriority" onchange="loadList()">
+                <option value="">全部优先级</option>
+                <option value="P0">P0</option>
+                <option value="P1">P1</option>
+                <option value="P2">P2</option>
+            </select>
+            <select id="filterStatus" onchange="loadList()">
+                <option value="">全部状态</option>
+                <option value="DRAFT">草稿</option>
+                <option value="ANALYZING">分析中</option>
+                <option value="READY">已准备</option>
+                <option value="IN_DEVELOPMENT">开发中</option>
+                <option value="TESTING">测试中</option>
+                <option value="COMPLETED">已完成</option>
+            </select>
+        </div>
+        <div class="item-list" id="itemList">
+            <div style="padding:40px;text-align:center;color:#aaa;">加载中…</div>
+        </div>
+    </div>
+
+    <div class="panel-right" id="detailPanel">
+        <div class="detail-empty">👈 选择左侧工作项查看详情</div>
+    </div>
+</div>
+
+<!-- 新建工作项弹窗 -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal">
+        <h3>新建工作项</h3>
+        <div class="form-group"><label>标题 *</label><input type="text" id="createTitle" maxlength="200" placeholder="请输入标题"></div>
+        <div class="form-group"><label>描述</label><textarea id="createDesc" maxlength="2000" placeholder="请输入描述"></textarea></div>
+        <div class="form-row">
+            <div class="form-group"><label>类型</label><select id="createType"><option value="STORY">需求</option><option value="BUG">缺陷</option><option value="TASK">任务</option></select></div>
+            <div class="form-group"><label>优先级</label><select id="createPriority"><option value="P0">P0</option><option value="P1" selected>P1</option><option value="P2">P2</option></select></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>负责人</label><input type="text" id="createAssignee" placeholder="负责人姓名"></div>
+            <div class="form-group"><label>风险等级</label><select id="createRisk"><option value="LOW">低</option><option value="MEDIUM" selected>中</option><option value="HIGH">高</option></select></div>
+        </div>
+        <div class="form-group"><label>标签（逗号分隔）</label><input type="text" id="createTags" placeholder="例如：后端, 核心功能"></div>
+        <div class="form-group"><label>验收标准（逗号分隔）</label><input type="text" id="createAc" placeholder="例如：支持多端访问, 响应时间<200ms"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+            <button class="btn-secondary" onclick="closeCreateModal()">取消</button>
+            <button class="btn-primary" onclick="createWorkItem()">创建</button>
+        </div>
+    </div>
+</div>
+
+<!-- 状态流转确认弹窗 -->
+<div class="modal-overlay" id="transitionModal">
+    <div class="modal">
+        <h3>状态流转确认</h3>
+        <p style="margin-bottom:12px;color:#666;">从 <strong id="tmFrom"></strong> → <strong id="tmTo"></strong></p>
+        <div class="form-group"><label>操作人</label><input type="text" id="tmOperator" placeholder="操作人姓名"></div>
+        <div class="form-group"><label>流转原因</label><textarea id="tmReason" placeholder="可选，填写流转原因"></textarea></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+            <button class="btn-secondary" onclick="closeTransitionModal()">取消</button>
+            <button class="btn-primary" onclick="confirmTransition()">确认流转</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── 中文翻译映射 ──
+const CN = {
+    type:  { STORY: '需求', BUG: '缺陷', TASK: '任务' },
+    status:{ DRAFT: '草稿', ANALYZING: '分析中', READY: '已准备', IN_DEVELOPMENT: '开发中', TESTING: '测试中', COMPLETED: '已完成' },
+    risk:  { HIGH: '高', MEDIUM: '中', LOW: '低' },
+    severity: { HIGH: '高', MEDIUM: '中', LOW: '低' },
+    clarificationStatus: { UNRESOLVED: '未解决', RESOLVED: '已解决' }
+};
+function cn(map, key) { return map[key] || key; }
+
+// ── API ──
+const API = '/api/work-items';
+async function api(method, url, body) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    const json = await res.json();
+    if (json.code !== 0) throw new Error(json.message || '未知错误');
+    return json.data;
+}
+function showToast(msg, type) {
+    const el = document.createElement('div');
+    el.className = 'toast toast-' + (type || 'success');
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+}
+function esc(s) { return (s || '').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function cls(k) { return (k || '').toLowerCase().replace(/_/g,'-'); }
+
+// ── 列表 ──
+let currentWorkItem = null;
+async function loadList() {
+    const params = new URLSearchParams();
+    const type = document.getElementById('filterType').value;
+    const priority = document.getElementById('filterPriority').value;
+    const status = document.getElementById('filterStatus').value;
+    if (type) params.set('type', type);
+    if (priority) params.set('priority', priority);
+    if (status) params.set('status', status);
+    try {
+        renderList(await api('GET', API + '?' + params.toString()));
+    } catch (e) {
+        document.getElementById('itemList').innerHTML = '<div style="padding:40px;text-align:center;color:#c62828;">加载失败: ' + e.message + '</div>';
+    }
+}
+function renderList(items) {
+    const ct = document.getElementById('itemList');
+    if (!items || items.length === 0) {
+        ct.innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;">暂无工作项</div>';
+        return;
+    }
+    ct.innerHTML = items.map(item => `
+        <div class="item-card ${currentWorkItem && currentWorkItem.id === item.id ? 'active' : ''}" onclick="selectItem('${item.id}')">
+            <div class="title">${esc(item.title)}</div>
+            <div class="meta">
+                <span class="badge badge-${cn(CN.type, item.type)}">${cn(CN.type, item.type)}</span>
+                <span class="badge badge-${cls(item.priority)}">${item.priority}</span>
+                <span class="badge badge-${cn(CN.status, item.status)}">${cn(CN.status, item.status)}</span>
+                <span>${item.assignee || '—'}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ── 详情 ──
+async function selectItem(id) {
+    try {
+        currentWorkItem = await api('GET', API + '/' + id);
+        loadList();
+        renderDetail();
+    } catch (e) {
+        showToast('加载详情失败: ' + e.message, 'error');
+    }
+}
+function renderDetail() {
+    const wi = currentWorkItem;
+    if (!wi) return;
+    let html = `
+        <div class="detail-section">
+            <h3>📋 ${esc(wi.title)}</h3>
+            <div class="detail-field"><label>ID</label><span>${esc(wi.id)}</span></div>
+            <div class="detail-field"><label>描述</label><span>${esc(wi.description) || '—'}</span></div>
+            <div class="detail-field"><label>类型</label><span class="badge badge-${cn(CN.type, wi.type)}">${cn(CN.type, wi.type)}</span></div>
+            <div class="detail-field"><label>优先级</label><span class="badge badge-${cls(wi.priority)}">${wi.priority}</span></div>
+            <div class="detail-field"><label>状态</label><span class="badge badge-${cn(CN.status, wi.status)}">${cn(CN.status, wi.status)}</span></div>
+            <div class="detail-field"><label>负责人</label><span>${esc(wi.assignee) || '—'}</span></div>
+            <div class="detail-field"><label>风险等级</label><span class="badge badge-${cn(CN.risk, wi.riskLevel)}">${cn(CN.risk, wi.riskLevel) || '—'}</span></div>
+            <div class="detail-field"><label>版本号</label><span>${wi.version}</span></div>
+            <div class="detail-field"><label>标签</label><span>${(wi.tags || []).join(', ') || '—'}</span></div>
+            <div class="detail-field"><label>验收标准</label><span>${(wi.acceptanceCriteria || []).join('；') || '—'}</span></div>
+            <div class="detail-field"><label>更新时间</label><span>${wi.updatedAt || '—'}</span></div>`;
+
+    // 状态流转按钮
+    const allowedTargets = getAllowedTargets(wi.status);
+    if (allowedTargets.length > 0) {
+        html += '<div class="transition-btns">';
+        allowedTargets.forEach(target => {
+            const isForward = isForwardTransition(wi.status, target);
+            html += `<button class="btn-transition ${isForward ? 'btn-forward' : 'btn-back'}" onclick="openTransitionModal('${target}')">→ ${cn(CN.status, target)}</button>`;
+        });
+        html += '</div>';
+    }
+    html += '</div>';
+
+    // 澄清问题
+    html += '<div class="detail-section"><h3>💬 澄清问题</h3>';
+    const clarifications = wi.clarifications || [];
+    if (clarifications.length === 0) {
+        html += '<p style="color:#aaa;font-size:0.85rem;">暂无澄清问题</p>';
+    } else {
+        clarifications.forEach(c => {
+            const cStatus = cn(CN.clarificationStatus, c.status);
+            html += `<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;">
+                <span class="badge badge-${cn(CN.severity, c.severity)}">${cn(CN.severity, c.severity)}</span>
+                <span class="badge" style="margin-left:6px;background:#${c.status==='RESOLVED'?'e8f5e9;color:#2e7d32':'f5f5f5;color:#616161'}">${cStatus}</span>
+                <strong style="margin-left:6px;">${esc(c.question)}</strong>
+                ${c.answer ? '<div style="color:#2e7d32;margin-top:4px;">→ ' + esc(c.answer) + '</div>' : ''}
+            </div>`;
+        });
+    }
+    html += `
+        <div style="margin-top:12px;display:flex;gap:8px;">
+            <input type="text" id="clarificationQuestion" placeholder="输入澄清问题" style="flex:1;padding:6px 10px;border:1px solid #d0d0d0;border-radius:4px;">
+            <select id="clarificationSeverity">
+                <option value="HIGH">高</option>
+                <option value="MEDIUM" selected>中</option>
+                <option value="LOW">低</option>
+            </select>
+            <button class="btn-primary" onclick="addClarification()" style="padding:6px 14px;font-size:0.85rem;">添加</button>
+        </div>`;
+    clarifications.filter(c => c.status === 'UNRESOLVED').forEach(c => {
+        html += `<div style="margin-top:6px;display:flex;gap:8px;">
+            <input type="text" id="resolveAnswer_${c.id}" placeholder="填写答案以解决此问题" style="flex:1;padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:0.8rem;">
+            <button class="btn-primary" onclick="resolveClarification(${c.id})" style="padding:4px 10px;font-size:0.8rem;">解决</button>
+        </div>`;
+    });
+    html += '</div>';
+
+    // AI 分析
+    html += `
+        <div class="detail-section">
+            <h3>🤖 AI 分析</h3>
+            <button class="btn-primary" onclick="triggerAIAnalysis()" style="margin-bottom:12px;">触发 AI 分析</button>
+            <div class="ai-panel" id="aiPanel">
+                <div id="aiContent"></div>
+            </div>
+        </div>`;
+
+    // 流转历史
+    html += '<div class="detail-section"><h3>📜 流转历史</h3>';
+    const transitions = wi.transitions || [];
+    if (transitions.length === 0) {
+        html += '<p style="color:#aaa;font-size:0.85rem;">暂无流转记录</p>';
+    } else {
+        transitions.forEach(t => {
+            html += `<div style="padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:0.85rem;">
+                <span class="badge badge-${cn(CN.status, t.fromStatus)}">${cn(CN.status, t.fromStatus)}</span>
+                → <span class="badge badge-${cn(CN.status, t.toStatus)}">${cn(CN.status, t.toStatus)}</span>
+                <span style="color:#888;margin-left:8px;">${t.operator || '—'}</span>
+                <span style="color:#aaa;margin-left:8px;">${t.createdAt || ''}</span>
+            </div>`;
+        });
+    }
+    html += '</div>';
+    document.getElementById('detailPanel').innerHTML = html;
+}
+
+// ── 状态流转规则 ──
+function getAllowedTargets(status) {
+    const map = {
+        'DRAFT': ['ANALYZING'],
+        'ANALYZING': ['READY', 'DRAFT'],
+        'READY': ['IN_DEVELOPMENT', 'ANALYZING'],
+        'IN_DEVELOPMENT': ['TESTING', 'READY'],
+        'TESTING': ['COMPLETED', 'IN_DEVELOPMENT'],
+        'COMPLETED': ['TESTING']
+    };
+    return map[status] || [];
+}
+function isForwardTransition(from, to) {
+    const order = ['DRAFT', 'ANALYZING', 'READY', 'IN_DEVELOPMENT', 'TESTING', 'COMPLETED'];
+    return order.indexOf(to) > order.indexOf(from);
+}
+
+// ── 流转弹窗 ──
+let currentTransition = null;
+function openTransitionModal(target) {
+    currentTransition = { target };
+    document.getElementById('tmFrom').textContent = cn(CN.status, currentWorkItem.status);
+    document.getElementById('tmTo').textContent = cn(CN.status, target);
+    document.getElementById('tmOperator').value = '';
+    document.getElementById('tmReason').value = '';
+    document.getElementById('transitionModal').classList.add('show');
+}
+function closeTransitionModal() {
+    document.getElementById('transitionModal').classList.remove('show');
+    currentTransition = null;
+}
+async function confirmTransition() {
+    if (!currentTransition) return;
+    try {
+        const body = {
+            targetStatus: currentTransition.target,
+            reason: document.getElementById('tmReason').value,
+            operator: document.getElementById('tmOperator').value || '匿名'
+        };
+        currentWorkItem = await api('POST', API + '/' + currentWorkItem.id + '/transitions', body);
+        closeTransitionModal();
+        renderDetail();
+        loadList();
+        showToast('流转成功: ' + cn(CN.status, currentWorkItem.status), 'success');
+    } catch (e) {
+        showToast('流转失败: ' + e.message, 'error');
+    }
+}
+
+// ── 澄清问题 ──
+async function addClarification() {
+    const question = document.getElementById('clarificationQuestion').value.trim();
+    if (!question) { showToast('请输入澄清问题', 'error'); return; }
+    const severity = document.getElementById('clarificationSeverity').value;
+    try {
+        await api('POST', API + '/' + currentWorkItem.id + '/clarifications', { question, severity });
+        currentWorkItem = await api('GET', API + '/' + currentWorkItem.id);
+        renderDetail();
+        showToast('澄清问题已添加', 'success');
+    } catch (e) {
+        showToast('添加失败: ' + e.message, 'error');
+    }
+}
+async function resolveClarification(clarificationId) {
+    const answer = document.getElementById('resolveAnswer_' + clarificationId).value.trim();
+    if (!answer) { showToast('请填写答案', 'error'); return; }
+    try {
+        await api('PUT', API + '/' + currentWorkItem.id + '/clarifications/' + clarificationId + '/resolve', { answer });
+        currentWorkItem = await api('GET', API + '/' + currentWorkItem.id);
+        renderDetail();
+        showToast('澄清问题已解决', 'success');
+    } catch (e) {
+        showToast('解决失败: ' + e.message, 'error');
+    }
+}
+
+// ── AI 分析 ──
+async function triggerAIAnalysis() {
+    try {
+        const result = await api('POST', API + '/' + currentWorkItem.id + '/ai-analysis');
+        const panel = document.getElementById('aiPanel');
+        const content = document.getElementById('aiContent');
+        let html = `<p style="margin-bottom:8px;"><strong>📝 分析摘要：</strong>${esc(result.summary)}</p>`;
+        if (result.risks && result.risks.length > 0) {
+            html += '<p style="margin-bottom:4px;"><strong>⚠️ 风险识别：</strong></p>';
+            result.risks.forEach(r => {
+                html += `<div class="risk-item"><span class="badge badge-${cn(CN.risk, r.level)}">${cn(CN.risk, r.level)}</span> ${esc(r.description)}</div>`;
+            });
+        }
+        if (result.suggestions && result.suggestions.length > 0) {
+            html += '<p style="margin-top:8px;margin-bottom:4px;"><strong>💡 建议：</strong></p><ul style="padding-left:20px;">';
+            result.suggestions.forEach(s => { html += `<li>${esc(s)}</li>`; });
+            html += '</ul>';
+        }
+        html += `<p style="color:#888;font-size:0.8rem;margin-top:8px;">分析时间: ${result.analyzedAt || ''}</p>`;
+        content.innerHTML = html;
+        panel.classList.add('show');
+        showToast('AI 分析完成', 'success');
+    } catch (e) {
+        showToast('AI 分析失败: ' + e.message, 'error');
+    }
+}
+
+// ── 创建工作项 ──
+function openCreateModal() { document.getElementById('createModal').classList.add('show'); }
+function closeCreateModal() { document.getElementById('createModal').classList.remove('show'); }
+async function createWorkItem() {
+    const title = document.getElementById('createTitle').value.trim();
+    if (!title) { showToast('标题不能为空', 'error'); return; }
+    const tagsRaw = document.getElementById('createTags').value.trim();
+    const acRaw = document.getElementById('createAc').value.trim();
+    const body = {
+        title: title,
+        description: document.getElementById('createDesc').value.trim(),
+        type: document.getElementById('createType').value,
+        priority: document.getElementById('createPriority').value,
+        assignee: document.getElementById('createAssignee').value.trim(),
+        riskLevel: document.getElementById('createRisk').value,
+        tags: tagsRaw ? tagsRaw.split(',').map(s => s.trim()).filter(Boolean) : [],
+        acceptanceCriteria: acRaw ? acRaw.split(',').map(s => s.trim()).filter(Boolean) : []
+    };
+    try {
+        const item = await api('POST', API, body);
+        closeCreateModal();
+        loadList();
+        selectItem(item.id);
+        showToast('工作项已创建: ' + item.id, 'success');
+    } catch (e) {
+        showToast('创建失败: ' + e.message, 'error');
+    }
+}
+
+// ── 初始化 ──
+loadList();
+</script>
+
+</body>
+</html>

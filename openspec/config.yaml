@@ -1,0 +1,14 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Java 8, Spring Boot 2.7.18, MyBatis-Plus 3.5.3.1, H2 2.1.214, SpringDoc OpenAPI 1.7.0, Lombok 1.18.30
+  Architecture: Classic 3-tier (Controller → Service → Mapper)
+  Domain: AI-assisted work item workflow and requirement clarification system
+  Conventions:
+    - RESTful API with unified ApiResponse<T> wrapper
+    - Unified error codes (WF-001 ~ WF-005)
+    - Status machine rules defined in WorkItemStatus enum (single source of truth)
+    - Optimistic locking via MyBatis-Plus @Version
+    - Frontend: Native HTML/CSS/JS with Fetch API, no build tools
+    - Database: H2 file mode (jdbc:h2:file:./data/clariflow)
+    - Maven multi-module, JDK 8 compatible

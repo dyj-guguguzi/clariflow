@@ -1,0 +1,69 @@
+sequenceDiagram
+    actor User as 用户 (Browser)
+    participant Web as index.html
+    participant WC as WorkItemController
+    participant TS as TransitionServiceImpl
+    participant CS as ClarificationServiceImpl
+    participant WS as WorkItemServiceImpl
+    participant CM as ClarificationMapper
+    participant TM as WorkItemTransitionMapper
+    participant WM as WorkItemMapper
+    participant DB as H2 Database
+
+    User->>Web: 点击状态流转按钮
+    Web->>WC: POST /api/work-items/{id}/transitions
+    Note over Web,WC: body: {targetStatus, reason, operator}
+
+    WC->>TS: executeTransition(workItemId, req)
+    TS->>WS: getWorkItem(id)  ← 获取当前工作项
+    WS->>WM: selectById(id)
+    WM->>DB: SELECT * FROM work_item WHERE id=?
+    DB-->>WM: current WorkItem
+    WM-->>WS: WorkItem
+    WS-->>TS: WorkItem
+
+    %% ── 规则1: 状态流转合法性校验 ──
+    TS->>TS: currentStatus.canTransitionTo(targetStatus)?
+    alt 非法流转
+        TS-->>WC: throw BusinessException(WF-002, "非法状态流转")
+        WC-->>Web: 422 ApiResponse(WF-002)
+        Web-->>User: 显示错误提示
+    end
+
+    %% ── 规则2: HIGH 级未解决澄清问题拦截 ──
+    TS->>CS: getClarifications(workItemId)
+    CS->>CM: selectList(workItemId, UNRESOLVED, HIGH)
+    CM->>DB: SELECT * FROM clarification WHERE work_item_id=? AND status='UNRESOLVED' AND severity='HIGH'
+    DB-->>CM: List~Clarification~
+    CM-->>CS: List~Clarification~
+    CS-->>TS: List~Clarification~
+
+    alt 存在 HIGH + UNRESOLVED 且目标状态为 READY 或 IN_DEVELOPMENT
+        TS-->>WC: throw BusinessException(WF-003, "存在未解决的高优先级澄清问题")
+        WC-->>Web: 422 ApiResponse(WF-003)
+        Web-->>User: 显示错误提示
+    end
+
+    %% ── 通过校验，执行流转 ──
+    TS->>WM: updateById(workItem) ← 更新 status + version
+    WM->>DB: UPDATE work_item SET status=?, version=version+1 WHERE id=? AND version=?
+    alt 版本冲突
+        DB-->>WM: rows=0
+        WM-->>TS: update failed
+        TS-->>WC: throw BusinessException(WF-005, "版本冲突，请重试")
+        WC-->>Web: 409 ApiResponse(WF-005)
+        Web-->>User: 显示冲突提示
+    end
+
+    DB-->>WM: rows=1 (OK)
+    WM-->>TS: OK
+
+    %% ── 记录流转历史 ──
+    TS->>TM: insert(transition)
+    TM->>DB: INSERT INTO work_item_transition ...
+    DB-->>TM: OK
+    TM-->>TS: OK
+
+    TS-->>WC: WorkItemResponse (含新状态)
+    WC-->>Web: ApiResponse~WorkItemResponse~
+    Web-->>User: 刷新详情面板
