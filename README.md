@@ -59,13 +59,16 @@ ClariFlow/
 # 1. 启动 Redis（Docker）
 docker start clariflow-redis || docker run -d --name clariflow-redis -p 6379:6379 redis:7-alpine
 
-# 2. 编译并启动
+# 2. 设置 DeepSeek API Key（可选，不设置则使用 Mock 模式）
+export DEEPSEEK_API_KEY=sk-your-key-here
+
+# 3. 编译并启动
 cd clari-flow
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_491.jdk/Contents/Home
 mvn clean package -DskipTests
 java -jar target/clari-flow-1.0.0.jar
 
-# 3. 访问
+# 4. 访问
 open http://localhost:8080/index.html
 ```
 

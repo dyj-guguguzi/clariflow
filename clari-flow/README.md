@@ -41,6 +41,16 @@
 
 ## 4. 如何运行
 
+### 设置 DeepSeek API Key（可选）
+```bash
+# 方式一：环境变量（推荐）
+export DEEPSEEK_API_KEY=sk-your-key-here
+
+# 方式二：直接写入配置文件
+# 编辑 src/main/resources/application.yml，将 api-key 替换为你的 Key
+```
+> 不设置则自动使用 Mock 模式（基于关键词规则模拟 AI 分析结果）。
+
 ### 方式一：Docker Compose（推荐）
 ```bash
 cd clari-flow
