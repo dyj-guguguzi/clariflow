@@ -14,6 +14,7 @@ import com.clariflow.workflow.model.enums.Severity;
 import com.clariflow.workflow.model.enums.WorkItemStatus;
 import com.clariflow.workflow.repository.ClarificationMapper;
 import com.clariflow.workflow.repository.WorkItemMapper;
+import com.clariflow.workflow.common.UserContext;
 import com.clariflow.workflow.repository.WorkItemTransitionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,13 +108,15 @@ public class TransitionServiceImpl implements TransitionService {
         transition.setWorkItemId(workItemId);
         transition.setFromStatus(previousStatus);
         transition.setToStatus(targetStatus);
+        String operator = request.getOperator() != null && !request.getOperator().isEmpty()
+                ? request.getOperator() : UserContext.getCurrentUser();
         transition.setReason(request.getReason());
-        transition.setOperator(request.getOperator());
+        transition.setOperator(operator);
         transition.setCreatedAt(LocalDateTime.now());
         transitionMapper.insert(transition);
 
         log.info("Transition executed: workItemId={}, {} -> {}, operator={}",
-                workItemId, previousStatus, targetStatus, request.getOperator());
+                workItemId, previousStatus, targetStatus, operator);
 
         // 6. Return updated WorkItemResponse (re-read to get latest version)
         return workItemService.toWorkItemResponse(workItemMapper.selectById(workItemId));

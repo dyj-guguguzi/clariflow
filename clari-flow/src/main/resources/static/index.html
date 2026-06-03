@@ -86,7 +86,12 @@
 
 <header>
     <h1>ClariFlow — 工作项状态流转</h1>
-    <button onclick="openCreateModal()">+ 新建工作项</button>
+    <div style="display:flex;align-items:center;gap:12px;">
+        <input type="text" id="currentUser" placeholder="当前用户" value="pm"
+               style="padding:6px 10px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:0.85rem;width:100px;"
+               title="设置当前操作人，将作为 X-User 请求头发送">
+        <button onclick="openCreateModal()">+ 新建工作项</button>
+    </div>
 </header>
 
 <div class="container">
@@ -152,7 +157,7 @@
     <div class="modal">
         <h3>状态流转确认</h3>
         <p style="margin-bottom:12px;color:#666;">从 <strong id="tmFrom"></strong> → <strong id="tmTo"></strong></p>
-        <div class="form-group"><label>操作人</label><input type="text" id="tmOperator" placeholder="操作人姓名"></div>
+        <div class="form-group"><label>操作人（可选，默认使用当前用户）</label><input type="text" id="tmOperator" placeholder="留空则使用当前用户"></div>
         <div class="form-group"><label>流转原因</label><textarea id="tmReason" placeholder="可选，填写流转原因"></textarea></div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
             <button class="btn-secondary" onclick="closeTransitionModal()">取消</button>
@@ -174,8 +179,14 @@ function cn(map, key) { return map[key] || key; }
 
 // ── API ──
 const API = '/api/work-items';
+function getCurrentUser() {
+    return document.getElementById('currentUser').value.trim() || 'anonymous';
+}
 async function api(method, url, body) {
-    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    const headers = { 'Content-Type': 'application/json' };
+    const user = getCurrentUser();
+    if (user) headers['X-User'] = user;
+    const opts = { method, headers };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
     const json = await res.json();
@@ -367,7 +378,7 @@ async function confirmTransition() {
         const body = {
             targetStatus: currentTransition.target,
             reason: document.getElementById('tmReason').value,
-            operator: document.getElementById('tmOperator').value || '匿名'
+            operator: document.getElementById('tmOperator').value || undefined
         };
         currentWorkItem = await api('POST', API + '/' + currentWorkItem.id + '/transitions', body);
         closeTransitionModal();
