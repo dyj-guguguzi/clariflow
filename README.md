@@ -78,6 +78,101 @@ open http://localhost:8080/index.html
 | Swagger UI | http://localhost:8080/swagger-ui/index.html |
 | H2 Console | http://localhost:8080/h2-console |
 
+## 连接数据库
+
+### H2 Console（浏览器）
+
+应用启动后，访问 http://localhost:8080/h2-console，填写：
+
+| 字段 | 值 |
+|------|-----|
+| JDBC URL | `jdbc:h2:file:./data/clariflow;DB_CLOSE_DELAY=-1;MODE=MySQL` |
+| 用户名 | `sa` |
+| 密码 | （留空） |
+
+点击「Connect」即可看到 `work_item`、`work_item_transition`、`clarification` 三张表。
+
+### 数据存储位置
+
+H2 以文件形式存储在 `clari-flow/data/` 目录：
+
+```
+data/
+├── clariflow.mv.db    # 数据文件
+└── clariflow.trace.db # 事务日志
+```
+
+删除 `data/` 目录后重启应用，会自动重建表并插入种子数据。
+
+### 数据库表结构
+
+```sql
+-- 工作项
+CREATE TABLE work_item (
+    id                  VARCHAR(20)  PRIMARY KEY,   -- 如 WI-001
+    title               VARCHAR(200) NOT NULL,       -- 标题
+    description         VARCHAR(2000),               -- 描述
+    type                VARCHAR(20)  DEFAULT 'STORY',-- STORY/BUG/TASK
+    priority            VARCHAR(10)  DEFAULT 'P2',   -- P0/P1/P2
+    status              VARCHAR(20)  DEFAULT 'DRAFT',-- 草稿/分析中/已准备/开发中/测试中/已完成
+    assignee            VARCHAR(50),                 -- 负责人
+    tags                VARCHAR(4000),               -- JSON 数组
+    acceptance_criteria VARCHAR(4000),               -- JSON 数组
+    risk_level          VARCHAR(10),                 -- HIGH/MEDIUM/LOW
+    version             INT          DEFAULT 1,      -- 乐观锁版本号
+    created_at          TIMESTAMP,
+    updated_at          TIMESTAMP
+);
+
+-- 状态流转记录
+CREATE TABLE work_item_transition (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    work_item_id VARCHAR(20) NOT NULL,
+    from_status  VARCHAR(20) NOT NULL,
+    to_status    VARCHAR(20) NOT NULL,
+    reason       VARCHAR(500),
+    operator     VARCHAR(50),
+    created_at   TIMESTAMP
+);
+
+-- 澄清问题
+CREATE TABLE clarification (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    work_item_id VARCHAR(20)  NOT NULL,
+    question     VARCHAR(1000) NOT NULL,
+    severity     VARCHAR(10)  DEFAULT 'MEDIUM',  -- HIGH/MEDIUM/LOW
+    status       VARCHAR(20)  DEFAULT 'UNRESOLVED', -- UNRESOLVED/RESOLVED
+    answer       VARCHAR(2000),
+    created_at   TIMESTAMP,
+    resolved_at  TIMESTAMP
+);
+```
+
+### 切换到 MySQL
+
+H2 运行在 `MODE=MySQL` 兼容模式。如需切换到真实 MySQL：
+
+1. 修改 `application.yml`：
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/clariflow?useSSL=false&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: your_password
+```
+
+2. 添加 MySQL 驱动依赖到 `pom.xml`：
+```xml
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
+3. 重启应用即可，DDL 表结构完全兼容。
+
 ## 技术栈
 
 Java 8 · Spring Boot 2.7.18 · MyBatis-Plus 3.5.3.1 · H2 · Redis 7 · Knife4j 4.3 · DeepSeek API · Docker Compose · JUnit 5
