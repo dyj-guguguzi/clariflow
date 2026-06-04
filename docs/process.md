@@ -86,5 +86,30 @@
 - **已完成**用户认证 → 已标注后续 Spring Security 扩展方向
 - **已完成**Docker Compose → Redis 7-alpine + App 容器编排
 - **已完成**真实 LLM 集成 → DeepSeek API，Mock 作为 `@ConditionalOnMissingBean` 备用
+- **已完成**用户上下文 → `X-User` 请求头 + `ThreadLocal` 轻量方案
 - **未做**复杂前端看板 → 题目不强制要求，全中文原生 HTML 已覆盖核心演示
 - **未做**MySQL 迁移 → H2 MySQL 兼容模式，迁移仅需改配置
+
+## 9. 后续扩展路径
+
+### 多人协作与权限控制
+当前通过 `X-User` 请求头 + `UserContext` 已具备用户识别能力。扩展路径：
+1. 添加 `sys_user` 表 + `sys_role` 表，建立 RBAC 模型
+2. 替换 `X-User` 为 JWT Token，由 Spring Security Filter 解析
+3. Controller 层添加 `@PreAuthorize` 注解控制操作权限
+4. `UserContext` 从 Token 中填充当前用户 ID、角色、权限集
+
+### 专业前端扩展
+当前原生 HTML 通过 Fetch API 调用 10 个 REST 端点。专业前端需要的额外 API：
+- 分页查询 `GET /api/work-items?page=1&size=20`
+- 批量状态变更 `PUT /api/work-items/batch-transitions`
+- 看板统计 `GET /api/work-items/stats?groupBy=status`
+- WebSocket 推送 `ws://.../notifications`（状态变更实时通知）
+- 搜索 `GET /api/work-items/search?keyword=xxx`
+
+### AI 服务演进
+当前 `AIAnalysisService` 接口已封装。扩展方向：
+- 支持流式返回（SSE）`POST /api/work-items/{id}/ai-analysis/stream`
+- 多模型切换（DeepSeek / Qwen / GPT）通过配置选择
+- 分析历史记录 `GET /api/work-items/{id}/ai-analysis/history`
+- 批量分析 `POST /api/work-items/ai-analysis/batch`
