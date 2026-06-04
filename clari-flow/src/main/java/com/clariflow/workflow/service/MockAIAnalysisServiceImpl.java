@@ -19,11 +19,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Mock implementation of {@link AIAnalysisService}.
+ * {@link AIAnalysisService} 的模拟实现。
  *
- * <p>Generates structured analysis results based on keyword matching
- * in the work item's title and description. This is a placeholder
- * for a future real AI integration.</p>
+ * <p>根据工作项标题和描述中的关键词匹配
+ * 生成结构化分析结果。这是一个占位实现，
+ * 为未来真正的 AI 集成做准备。</p>
  */
 @Service
 @ConditionalOnMissingBean(DeepSeekAIAnalysisService.class)
@@ -48,13 +48,13 @@ public class MockAIAnalysisServiceImpl implements AIAnalysisService {
         String title = workItem.getTitle() != null ? workItem.getTitle() : "";
         String description = workItem.getDescription() != null ? workItem.getDescription() : "";
 
-        // Generate mock summary based on title and description
+        // 根据标题和描述生成模拟摘要
         String summary = generateSummary(title, description);
 
-        // Generate mock risks based on keyword analysis
+        // 根据关键词分析生成模拟风险点
         List<AIAnalysisResponse.RiskItem> risks = generateRisks(title, description);
 
-        // Generate mock suggestions
+        // 生成模拟建议
         List<String> suggestions = generateSuggestions(title, description);
 
         log.info("Mock AI analysis completed for workItemId={}", workItemId);
@@ -68,7 +68,7 @@ public class MockAIAnalysisServiceImpl implements AIAnalysisService {
     }
 
     /**
-     * Generates a mock executive summary based on the work item content.
+     * 根据工作项内容生成模拟摘要。
      */
     private String generateSummary(String title, String description) {
         StringBuilder sb = new StringBuilder();
@@ -98,12 +98,12 @@ public class MockAIAnalysisServiceImpl implements AIAnalysisService {
     }
 
     /**
-     * Generates mock risk items based on keyword analysis.
+     * 根据关键词分析生成模拟风险项。
      */
     private List<AIAnalysisResponse.RiskItem> generateRisks(String title, String description) {
         List<AIAnalysisResponse.RiskItem> risks = new ArrayList<>();
 
-        // Check for common risk patterns
+        // 检查常见风险模式
         if (description.contains("状态") || description.contains("流转")) {
             risks.add(new AIAnalysisResponse.RiskItem(
                     Severity.HIGH,
@@ -128,7 +128,7 @@ public class MockAIAnalysisServiceImpl implements AIAnalysisService {
                     "并发场景下的版本冲突处理需要完善的重试策略"));
         }
 
-        // Default risk if none matched
+        // 如果没有匹配到，使用默认风险项
         if (risks.isEmpty()) {
             risks.add(new AIAnalysisResponse.RiskItem(
                     Severity.LOW,
@@ -139,7 +139,7 @@ public class MockAIAnalysisServiceImpl implements AIAnalysisService {
     }
 
     /**
-     * Generates mock actionable suggestions.
+     * 生成模拟可操作建议。
      */
     private List<String> generateSuggestions(String title, String description) {
         List<String> suggestions = new ArrayList<>();

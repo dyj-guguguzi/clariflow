@@ -35,11 +35,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Integration tests for {@link WorkItemController} using MockMvc.
+ * 使用 MockMvc 对 {@link WorkItemController} 进行集成测试。
  *
- * <p>Tests REST API endpoints for work item CRUD and state transitions,
- * verifying correct HTTP status codes, response structure, and
- * API contract compliance.</p>
+ * <p>测试工作项 CRUD 和状态流转的 REST API 端点，
+ * 验证正确的 HTTP 状态码、响应结构和 API 契约合规性。</p>
  */
 @WebMvcTest(value = WorkItemController.class,
         excludeAutoConfiguration = {
@@ -60,7 +59,7 @@ class WorkItemControllerTest {
     @MockBean
     private TransitionService transitionService;
 
-    // Suppress MyBatis mapper auto-scanning from @MapperScan
+    // 抑制 MyBatis Mapper 自动扫描（来自 @MapperScan）
     @MockBean
     private WorkItemMapper workItemMapper;
 
@@ -73,7 +72,7 @@ class WorkItemControllerTest {
     @MockBean
     private UserMapper userMapper;
 
-    // ── Helper to build mock WorkItemResponse ──
+    // ── 辅助方法：构建 Mock WorkItemResponse ──
 
     private WorkItemResponse buildMockResponse(String id, WorkItemStatus status) {
         return WorkItemResponse.builder()
@@ -109,7 +108,7 @@ class WorkItemControllerTest {
                 .build();
     }
 
-    // ── Tests ──
+    // ── 测试方法 ──
 
     @Test
     @DisplayName("POST /api/work-items — 创建工作项成功返回 201")
@@ -140,7 +139,7 @@ class WorkItemControllerTest {
     @DisplayName("POST /api/work-items — 缺少必填字段返回 422")
     void createWorkItemMissingTitleShouldReturn422() throws Exception {
         WorkItemCreateRequest request = new WorkItemCreateRequest();
-        // title is blank — should fail validation
+        // title 为空 —— 应触发校验失败
 
         mockMvc.perform(post("/api/work-items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -231,7 +230,7 @@ class WorkItemControllerTest {
     void updateWorkItemMissingVersionShouldReturn422() throws Exception {
         WorkItemUpdateRequest request = new WorkItemUpdateRequest();
         request.setTitle("Updated Title");
-        // version is null — should fail validation
+        // version 为 null —— 应触发校验失败
 
         mockMvc.perform(put("/api/work-items/WI-001")
                         .contentType(MediaType.APPLICATION_JSON)

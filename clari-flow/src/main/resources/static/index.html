@@ -180,6 +180,10 @@ function cn(map, key) { return map[key] || key; }
 
 // ── 认证信息 ──
 const token = localStorage.getItem('token');
+// 前端防线：无 token 直接跳转登录页（与 JwtAuthFilter Cookie 检查形成双保险）
+if (!token) {
+    window.location.replace('/login.html');
+}
 const currentUsername = localStorage.getItem('username');
 
 // ── API ──
@@ -516,7 +520,15 @@ document.getElementById('displayUser').textContent = currentUsername || 'anonymo
 loadUsers();
 loadList();
 
-function logout() {
+async function logout() {
+    try {
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }
+        });
+    } catch (e) {
+        // 即使服务端登出失败也清除本地状态
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     window.location.href = '/login.html';

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Response DTO for a single state transition record.
+ * 单条状态流转记录的响应 DTO。
  */
 @Data
 @Builder
@@ -17,24 +17,24 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TransitionResponse {
 
-    /** Transition record ID. */
+    /** 流转记录 ID。 */
     private Long id;
 
-    /** Parent work item ID. */
+    /** 父工作项 ID。 */
     private String workItemId;
 
-    /** Status before the transition. */
+    /** 流转前的状态。 */
     private WorkItemStatus fromStatus;
 
-    /** Status after the transition. */
+    /** 流转后的状态。 */
     private WorkItemStatus toStatus;
 
-    /** Reason or comment. */
+    /** 原因或备注。 */
     private String reason;
 
-    /** Person who performed the transition. */
+    /** 执行流转的人员。 */
     private String operator;
 
-    /** Timestamp of the transition. */
+    /** 流转时间戳。 */
     private LocalDateTime createdAt;
 }

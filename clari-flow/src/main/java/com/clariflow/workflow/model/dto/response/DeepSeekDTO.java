@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * DeepSeek API request/response DTOs (OpenAI-compatible format).
+ * DeepSeek API 请求/响应 DTO（兼容 OpenAI 格式）。
  */
 public class DeepSeekDTO {
 

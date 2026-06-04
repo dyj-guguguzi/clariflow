@@ -18,11 +18,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Work item entity — maps to the {@code work_item} table.
+ * 工作项实体 — 映射到 {@code work_item} 表。
  *
- * <p>Represents a unit of work (story, bug, or task) that progresses
- * through a defined state flow from DRAFT to COMPLETED. Uses optimistic
- * locking via the {@code version} field.</p>
+ * <p>表示一个工作单元（需求、缺陷或任务），在定义的状态流中从 DRAFT 流转到 COMPLETED。
+ * 通过 {@code version} 字段使用乐观锁机制。</p>
  */
 @Data
 @NoArgsConstructor
@@ -30,46 +29,46 @@ import java.util.List;
 @TableName("work_item")
 public class WorkItem {
 
-    /** Unique identifier, e.g. "WI-001". */
+    /** 唯一标识符，例如 "WI-001"。 */
     @TableId(type = IdType.ASSIGN_ID)
     private String id;
 
-    /** Title / summary of the work item. */
+    /** 工作项的标题/摘要。 */
     private String title;
 
-    /** Detailed description of the work. */
+    /** 工作项的详细描述。 */
     private String description;
 
-    /** Type of work: STORY, BUG, or TASK. */
+    /** 工作类型：STORY、BUG 或 TASK。 */
     private WorkItemType type;
 
-    /** Priority level: P0, P1, or P2. */
+    /** 优先级：P0、P1 或 P2。 */
     private Priority priority;
 
-    /** Current status in the state flow. */
+    /** 状态流中的当前状态。 */
     private WorkItemStatus status;
 
-    /** Assigned person (free-text string in MVP). */
+    /** 负责人（MVP 阶段为自由文本）。 */
     private String assignee;
 
-    /** Tags as a list, stored as JSON array in VARCHAR column. */
+    /** 标签列表，以 JSON 数组形式存储在 VARCHAR 列中。 */
     @TableField(typeHandler = JsonListTypeHandler.class)
     private List<String> tags;
 
-    /** Acceptance criteria as a list, stored as JSON array in VARCHAR column. */
+    /** 验收标准列表，以 JSON 数组形式存储在 VARCHAR 列中。 */
     @TableField(value = "acceptance_criteria", typeHandler = JsonListTypeHandler.class)
     private List<String> acceptanceCriteria;
 
-    /** Overall risk level of the work item. */
+    /** 工作项的整体风险等级。 */
     private Severity riskLevel;
 
-    /** Optimistic lock version — incremented on each update. */
+    /** 乐观锁版本号 — 每次更新时自增。 */
     @Version
     private Integer version;
 
-    /** Timestamp when the work item was created. */
+    /** 工作项创建时间戳。 */
     private LocalDateTime createdAt;
 
-    /** Timestamp of the last update. */
+    /** 最后更新时间戳。 */
     private LocalDateTime updatedAt;
 }

@@ -12,11 +12,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Clarification entity — maps to the {@code clarification} table.
+ * 澄清实体 — 映射到 {@code clarification} 表。
  *
- * <p>Represents a question that needs to be resolved before a work item
- * can progress to certain states (READY, IN_DEVELOPMENT). HIGH-severity
- * + UNRESOLVED clarifications act as blockers.</p>
+ * <p>表示工作项流转到特定状态（READY、IN_DEVELOPMENT）之前需要解决的问题。
+ * HIGH 严重程度 + UNRESOLVED 状态的澄清为阻塞项。</p>
  */
 @Data
 @NoArgsConstructor
@@ -24,28 +23,28 @@ import java.time.LocalDateTime;
 @TableName("clarification")
 public class Clarification {
 
-    /** Auto-generated primary key. */
+    /** 自增主键。 */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** Foreign key to the parent work item. */
+    /** 父工作项的外键。 */
     private String workItemId;
 
-    /** The clarification question text. */
+    /** 澄清问题文本。 */
     private String question;
 
-    /** Severity of the clarification: HIGH, MEDIUM, or LOW. */
+    /** 澄清的严重程度：HIGH、MEDIUM 或 LOW。 */
     private Severity severity;
 
-    /** Current status: UNRESOLVED or RESOLVED. */
+    /** 当前状态：UNRESOLVED 或 RESOLVED。 */
     private ClarificationStatus status;
 
-    /** Answer text — populated when resolved. */
+    /** 答案文本 — 解决时填充。 */
     private String answer;
 
-    /** Timestamp when the clarification was created. */
+    /** 澄清创建时间戳。 */
     private LocalDateTime createdAt;
 
-    /** Timestamp when the clarification was resolved (nullable). */
+    /** 澄清解决时间戳（可为空）。 */
     private LocalDateTime resolvedAt;
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * REST controller for user listing — used by frontend searchable dropdowns.
+ * 用户列表的 REST 控制器——供前端可搜索下拉框使用。
  */
 @RestController
 @RequestMapping("/api/users")

@@ -61,4 +61,12 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getUsername());
         return new LoginResponse(token, user.getUsername(), user.getRole());
     }
+
+    /** 登出：将 Token 加入 Redis 黑名单，使其在有效期内也无法使用 */
+    public void logout(String token) {
+        if (token != null && !token.isEmpty()) {
+            jwtUtil.blacklistToken(token);
+            log.info("Token 已加入黑名单");
+        }
+    }
 }

@@ -1,16 +1,15 @@
 package com.clariflow.workflow.model.enums;
 
 /**
- * Clarification status enumeration.
+ * 澄清状态枚举。
  *
- * <p>Clarifications start as UNRESOLVED and transition to RESOLVED
- * when an answer is provided.</p>
+ * <p>澄清从 UNRESOLVED 开始，提供答案后流转到 RESOLVED。</p>
  */
 public enum ClarificationStatus {
 
-    /** Unresolved — the clarification question has not been answered yet. */
+    /** 未解决 — 澄清问题尚未得到回答。 */
     UNRESOLVED,
 
-    /** Resolved — the clarification question has been answered. */
+    /** 已解决 — 澄清问题已得到回答。 */
     RESOLVED
 }

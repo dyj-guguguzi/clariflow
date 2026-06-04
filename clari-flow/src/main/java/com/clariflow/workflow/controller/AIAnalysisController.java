@@ -9,11 +9,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller for AI-powered work item analysis.
+ * AI 驱动的工作项分析 REST 控制器。
  *
- * <p>Provides endpoints for triggering mock AI analysis on work items.
- * The analysis generates structured insights including a summary,
- * identified risks, and actionable suggestions.</p>
+ * <p>提供触发工作项 AI 分析的接口。
+ * 分析生成结构化洞察，包括摘要、
+ * 已识别风险点和可操作建议。</p>
  */
 @RestController
 @RequestMapping("/api/work-items/{workItemId}/ai-analysis")
@@ -27,10 +27,10 @@ public class AIAnalysisController {
     }
 
     /**
-     * Triggers AI analysis for a work item.
+     * 触发对工作项的 AI 分析。
      *
-     * @param workItemId the work item ID to analyze
-     * @return structured analysis result
+     * @param workItemId 要分析的工作项 ID
+     * @return 结构化分析结果
      */
     @PostMapping
     @Operation(summary = "触发AI分析", description = "对指定工作项进行AI分析，生成摘要、风险点和建议")

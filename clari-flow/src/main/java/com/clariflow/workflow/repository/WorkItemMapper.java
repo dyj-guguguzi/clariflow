@@ -5,12 +5,12 @@ import com.clariflow.workflow.model.entity.WorkItem;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * MyBatis-Plus mapper for {@link WorkItem}.
+ * {@link WorkItem} 的 MyBatis-Plus Mapper。
  *
- * <p>Inherits standard CRUD operations from {@link BaseMapper}.
- * Custom queries can be added here as needed.</p>
+ * <p>继承自 {@link BaseMapper}，拥有标准的 CRUD 操作。
+ * 可在此处按需添加自定义查询。</p>
  */
 @Mapper
 public interface WorkItemMapper extends BaseMapper<WorkItem> {
-    // Standard CRUD inherited from BaseMapper<WorkItem>
+    // 标准 CRUD 继承自 BaseMapper<WorkItem>
 }

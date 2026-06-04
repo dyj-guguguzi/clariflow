@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Response DTO for a clarification question/answer.
+ * 澄清问题/答案的响应 DTO。
  */
 @Data
 @Builder
@@ -18,27 +18,27 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ClarificationResponse {
 
-    /** Clarification ID. */
+    /** 澄清 ID。 */
     private Long id;
 
-    /** Parent work item ID. */
+    /** 父工作项 ID。 */
     private String workItemId;
 
-    /** The question text. */
+    /** 问题文本。 */
     private String question;
 
-    /** Severity level. */
+    /** 严重程度。 */
     private Severity severity;
 
-    /** Current status. */
+    /** 当前状态。 */
     private ClarificationStatus status;
 
-    /** Answer text — null if still UNRESOLVED. */
+    /** 答案文本 — 如果仍为 UNRESOLVED 则为 null。 */
     private String answer;
 
-    /** Creation timestamp. */
+    /** 创建时间戳。 */
     private LocalDateTime createdAt;
 
-    /** Resolution timestamp — null if UNRESOLVED. */
+    /** 解决时间戳 — 如果为 UNRESOLVED 则为 null。 */
     private LocalDateTime resolvedAt;
 }

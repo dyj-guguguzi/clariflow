@@ -12,10 +12,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Lightweight work item response for list views.
+ * 列表视图的轻量级工作项响应。
  *
- * <p>Excludes heavy fields like description, tags, acceptance criteria,
- * clarifications, and transitions to optimize list performance.</p>
+ * <p>排除了描述、标签、验收标准、澄清和流转记录等重字段，以优化列表性能。</p>
  */
 @Data
 @Builder
@@ -23,27 +22,27 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class WorkItemListItemResponse {
 
-    /** Unique identifier. */
+    /** 唯一标识符。 */
     private String id;
 
-    /** Title / summary. */
+    /** 标题/摘要。 */
     private String title;
 
-    /** Type of work item. */
+    /** 工作项类型。 */
     private WorkItemType type;
 
-    /** Priority level. */
+    /** 优先级。 */
     private Priority priority;
 
-    /** Current status. */
+    /** 当前状态。 */
     private WorkItemStatus status;
 
-    /** Assigned person. */
+    /** 负责人。 */
     private String assignee;
 
-    /** Risk level. */
+    /** 风险等级。 */
     private Severity riskLevel;
 
-    /** Last update timestamp. */
+    /** 最后更新时间戳。 */
     private LocalDateTime updatedAt;
 }

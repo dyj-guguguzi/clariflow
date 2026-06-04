@@ -19,10 +19,10 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * REST controller for work item management.
+ * 工作项管理的 REST 控制器。
  *
- * <p>Provides endpoints for CRUD operations on work items
- * and state transition management.</p>
+ * <p>提供工作项的 CRUD 操作和
+ * 状态流转管理的接口。</p>
  */
 @RestController
 @RequestMapping("/api/work-items")
@@ -39,10 +39,10 @@ public class WorkItemController {
     }
 
     /**
-     * Creates a new work item.
+     * 创建新的工作项。
      *
-     * @param request the creation request
-     * @return the created work item
+     * @param request 创建请求
+     * @return 已创建的工作项
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -54,12 +54,12 @@ public class WorkItemController {
     }
 
     /**
-     * Lists work items with optional filtering.
+     * 列出工作项，支持可选筛选。
      *
-     * @param type     optional type filter
-     * @param priority optional priority filter
-     * @param status   optional status filter
-     * @return filtered list of work items
+     * @param type     可选类型筛选
+     * @param priority 可选优先级筛选
+     * @param status   可选状态筛选
+     * @return 筛选后的工作项列表
      */
     @GetMapping
     @Operation(summary = "获取工作项列表", description = "获取工作项列表，支持按类型、优先级、状态筛选")
@@ -75,10 +75,10 @@ public class WorkItemController {
     }
 
     /**
-     * Retrieves a work item by ID with full details.
+     * 根据 ID 获取工作项的完整详情。
      *
-     * @param id the work item ID
-     * @return the full work item response
+     * @param id 工作项 ID
+     * @return 完整的工作项响应
      */
     @GetMapping("/{id}")
     @Operation(summary = "获取工作项详情", description = "根据ID获取工作项完整信息，包含澄清问题和流转历史")
@@ -89,11 +89,11 @@ public class WorkItemController {
     }
 
     /**
-     * Updates a work item's metadata.
+     * 更新工作项的元数据。
      *
-     * @param id      the work item ID
-     * @param request the update request (includes version for optimistic locking)
-     * @return the updated work item
+     * @param id      工作项 ID
+     * @param request 更新请求（包含乐观锁用的版本号）
+     * @return 已更新的工作项
      */
     @PutMapping("/{id}")
     @Operation(summary = "更新工作项", description = "更新工作项基本信息，需要传入版本号进行乐观锁校验")
@@ -105,11 +105,11 @@ public class WorkItemController {
     }
 
     /**
-     * Executes a state transition for the work item.
+     * 对工作项执行状态流转。
      *
-     * @param id      the work item ID
-     * @param request the transition request (target status, reason, operator)
-     * @return the updated work item with new status
+     * @param id      工作项 ID
+     * @param request 流转请求（目标状态、原因、操作人）
+     * @return 状态更新后的工作项
      */
     @PostMapping("/{id}/transitions")
     @Operation(summary = "执行状态流转", description = "将工作项从当前状态流转到目标状态（状态机核心接口）")
@@ -121,10 +121,10 @@ public class WorkItemController {
     }
 
     /**
-     * Retrieves the transition history for a work item.
+     * 获取工作项的流转历史。
      *
-     * @param id the work item ID
-     * @return list of transition records
+     * @param id 工作项 ID
+     * @return 流转记录列表
      */
     @GetMapping("/{id}/transitions")
     @Operation(summary = "获取流转历史", description = "获取工作项的所有状态流转记录")
@@ -135,10 +135,10 @@ public class WorkItemController {
     }
 
     /**
-     * Deletes a work item and all associated data.
+     * 删除工作项及其所有关联数据。
      *
-     * @param id the work item ID
-     * @return empty success response
+     * @param id 工作项 ID
+     * @return 空的成功响应
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "删除工作项", description = "删除工作项及其关联的澄清问题和流转记录")

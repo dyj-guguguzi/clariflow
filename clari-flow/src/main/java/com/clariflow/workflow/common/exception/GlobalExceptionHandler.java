@@ -15,11 +15,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import java.util.stream.Collectors;
 
 /**
- * Global exception handler that intercepts all unhandled exceptions
- * and converts them into standardized {@link ApiResponse} error payloads.
+ * 全局异常处理器，拦截所有未处理的异常并将其转换为标准化的
+ * {@link ApiResponse} 错误载荷。
  *
- * <p>Maps business exceptions to their corresponding HTTP status codes
- * (404, 409, 422) and generic exceptions to 500.</p>
+ * <p>将业务异常映射到对应的 HTTP 状态码（404、409、422），
+ * 通用异常映射到 500。</p>
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -27,10 +27,10 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * Handles {@link BusinessException} — maps error code to HTTP status.
+     * 处理 {@link BusinessException} — 将错误码映射到 HTTP 状态码。
      *
-     * @param ex the business exception
-     * @return ResponseEntity with ApiResponse error body
+     * @param ex 业务异常
+     * @return 包含 ApiResponse 错误体的 ResponseEntity
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
@@ -41,10 +41,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles validation errors from {@code @Valid} annotated request bodies.
+     * 处理 {@code @Valid} 注解的请求体校验错误。
      *
-     * @param ex the validation exception
-     * @return 422 with field-level error details
+     * @param ex 校验异常
+     * @return 422，包含字段级别的错误详情
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
@@ -57,10 +57,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles type mismatch errors (e.g. invalid enum values in query params).
+     * 处理类型不匹配错误（例如查询参数中的无效枚举值）。
      *
-     * @param ex the type mismatch exception
-     * @return 400 with error details
+     * @param ex 类型不匹配异常
+     * @return 400，包含错误详情
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
@@ -71,10 +71,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles malformed JSON request bodies.
+     * 处理格式错误的 JSON 请求体。
      *
-     * @param ex the message not readable exception
-     * @return 400 with error details
+     * @param ex 消息不可读异常
+     * @return 400，包含错误详情
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleMessageNotReadable(HttpMessageNotReadableException ex) {
@@ -84,10 +84,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles all uncaught exceptions — returns 500.
+     * 处理所有未捕获的异常 — 返回 500。
      *
-     * @param ex the exception
-     * @return 500 Internal Server Error
+     * @param ex 异常
+     * @return 500 内部服务器错误
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {

@@ -1,20 +1,19 @@
 package com.clariflow.workflow.model.enums;
 
 /**
- * Severity / risk level enumeration.
+ * 严重程度/风险等级枚举。
  *
- * <p>Used for both work item risk level and clarification severity.
- * HIGH severity clarifications with UNRESOLVED status block transitions
- * to READY or IN_DEVELOPMENT.</p>
+ * <p>同时用于工作项风险等级和澄清严重程度。
+ * HIGH 严重程度且 UNRESOLVED 状态的澄清会阻塞向 READY 或 IN_DEVELOPMENT 的流转。</p>
  */
 public enum Severity {
 
-    /** High severity — blocking issue requiring immediate attention. */
+    /** 高严重性 — 阻塞问题，需要立即关注。 */
     HIGH,
 
-    /** Medium severity — should be addressed but not blocking. */
+    /** 中严重性 — 应处理但不阻塞。 */
     MEDIUM,
 
-    /** Low severity — minor concern, can be deferred. */
+    /** 低严重性 — 轻微关注，可以推迟。 */
     LOW
 }

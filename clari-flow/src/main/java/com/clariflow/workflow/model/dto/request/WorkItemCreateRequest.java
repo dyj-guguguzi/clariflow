@@ -12,37 +12,37 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
- * Request DTO for creating a new work item.
+ * 创建工作项的请求 DTO。
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkItemCreateRequest {
 
-    /** Title — required, max 200 chars. */
+    /** 标题 — 必填，最多 200 个字符。 */
     @NotBlank(message = "标题不能为空")
     @Size(max = 200, message = "标题不能超过200个字符")
     private String title;
 
-    /** Detailed description — optional, max 2000 chars. */
+    /** 详细描述 — 可选，最多 2000 个字符。 */
     @Size(max = 2000, message = "描述不能超过2000个字符")
     private String description;
 
-    /** Type of work item. Defaults to STORY if not specified. */
+    /** 工作项类型。未指定时默认为 STORY。 */
     private WorkItemType type = WorkItemType.STORY;
 
-    /** Priority level. Defaults to P2. */
+    /** 优先级。默认为 P2。 */
     private Priority priority = Priority.P2;
 
-    /** Assignee name (free-text). */
+    /** 负责人名称（自由文本）。 */
     private String assignee;
 
-    /** Tags for categorization. */
+    /** 分类标签。 */
     private List<String> tags;
 
-    /** Acceptance criteria list. */
+    /** 验收标准列表。 */
     private List<String> acceptanceCriteria;
 
-    /** Overall risk level. */
+    /** 整体风险等级。 */
     private Severity riskLevel = Severity.MEDIUM;
 }

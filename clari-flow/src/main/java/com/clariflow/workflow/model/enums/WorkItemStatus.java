@@ -5,12 +5,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Work item status enumeration with built-in state transition rules.
+ * 工作项状态枚举，内置状态流转规则。
  *
- * <p>This is the single source of truth for all valid state transitions.
- * Each status defines exactly which target statuses it can transition to.
- * Any transition not listed here is considered invalid and will result in
- * a {@code WF-002 INVALID_TRANSITION} error.</p>
+ * <p>这是所有合法状态流转的唯一数据源。
+ * 每个状态定义了自己可以流转到哪些目标状态。
+ * 未在此处列出的流转将被视为无效，并返回 {@code WF-002 INVALID_TRANSITION} 错误。</p>
  *
  * <pre>
  *   DRAFT          → ANALYZING
@@ -23,7 +22,7 @@ import java.util.List;
  */
 public enum WorkItemStatus {
 
-    /** Initial draft state — work item has been created but not yet analyzed. */
+    /** 初始草稿状态 — 工作项已创建但尚未分析。 */
     DRAFT {
         @Override
         public List<WorkItemStatus> getAllowedTargets() {
@@ -31,7 +30,7 @@ public enum WorkItemStatus {
         }
     },
 
-    /** Analysis in progress — requirements are being clarified. */
+    /** 分析进行中 — 需求正在澄清中。 */
     ANALYZING {
         @Override
         public List<WorkItemStatus> getAllowedTargets() {
@@ -39,7 +38,7 @@ public enum WorkItemStatus {
         }
     },
 
-    /** Ready for development — all clarifications resolved. */
+    /** 准备就绪 — 所有澄清已解决。 */
     READY {
         @Override
         public List<WorkItemStatus> getAllowedTargets() {
@@ -47,7 +46,7 @@ public enum WorkItemStatus {
         }
     },
 
-    /** Development in progress — implementation is underway. */
+    /** 开发进行中 — 实现正在进行中。 */
     IN_DEVELOPMENT {
         @Override
         public List<WorkItemStatus> getAllowedTargets() {
@@ -55,7 +54,7 @@ public enum WorkItemStatus {
         }
     },
 
-    /** Testing in progress — quality assurance is being performed. */
+    /** 测试进行中 — 质量保证正在执行中。 */
     TESTING {
         @Override
         public List<WorkItemStatus> getAllowedTargets() {
@@ -63,7 +62,7 @@ public enum WorkItemStatus {
         }
     },
 
-    /** Completed — work item has been fully delivered. Terminal state, no further transitions allowed. */
+    /** 已完成 — 工作项已完全交付。终态，不再允许流转。 */
     COMPLETED {
         @Override
         public List<WorkItemStatus> getAllowedTargets() {
@@ -72,17 +71,17 @@ public enum WorkItemStatus {
     };
 
     /**
-     * Returns the list of statuses this status can transition to.
+     * 返回当前状态可以流转到的目标状态列表。
      *
-     * @return unmodifiable list of allowed target statuses
+     * @return 允许的目标状态不可变列表
      */
     public abstract List<WorkItemStatus> getAllowedTargets();
 
     /**
-     * Checks whether transitioning to the given target status is valid.
+     * 检查流转到指定目标状态是否合法。
      *
-     * @param target the desired target status
-     * @return {@code true} if the transition is allowed
+     * @param target 期望的目标状态
+     * @return 如果流转被允许则返回 {@code true}
      */
     public boolean canTransitionTo(WorkItemStatus target) {
         return getAllowedTargets().contains(target);

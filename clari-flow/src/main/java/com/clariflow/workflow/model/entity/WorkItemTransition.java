@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Work item transition entity — maps to the {@code work_item_transition} table.
+ * 工作项流转实体 — 映射到 {@code work_item_transition} 表。
  *
- * <p>Records every state transition for audit trail and history purposes.
- * Each record captures the source status, target status, reason, and operator.</p>
+ * <p>记录每次状态流转，用于审计追踪和历史记录。
+ * 每条记录包含源状态、目标状态、原因和操作人。</p>
  */
 @Data
 @NoArgsConstructor
@@ -22,25 +22,25 @@ import java.time.LocalDateTime;
 @TableName("work_item_transition")
 public class WorkItemTransition {
 
-    /** Auto-generated primary key. */
+    /** 自增主键。 */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** Foreign key to the parent work item. */
+    /** 父工作项的外键。 */
     private String workItemId;
 
-    /** Status before the transition. */
+    /** 流转前的状态。 */
     private WorkItemStatus fromStatus;
 
-    /** Status after the transition. */
+    /** 流转后的状态。 */
     private WorkItemStatus toStatus;
 
-    /** Reason or comment for the transition. */
+    /** 流转原因或备注。 */
     private String reason;
 
-    /** Person who performed the transition. */
+    /** 执行流转的人员。 */
     private String operator;
 
-    /** Timestamp when the transition occurred. */
+    /** 流转发生的时间戳。 */
     private LocalDateTime createdAt;
 }

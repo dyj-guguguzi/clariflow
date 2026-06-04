@@ -26,11 +26,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for HIGH-severity clarification blocking rules.
+ * HIGH 级别澄清拦截规则测试。
  *
- * <p>Verifies that transitions to READY and IN_DEVELOPMENT are blocked
- * when there are unresolved HIGH-severity clarifications, but allowed
- * when clarifications are resolved or of lower severity.</p>
+ * <p>验证当存在未解决的 HIGH 级别澄清时，到 READY 和 IN_DEVELOPMENT 的流转会被拦截，
+ * 但澄清已解决或级别较低时则允许通过。</p>
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ClarificationService — HIGH 级拦截规则测试")
@@ -75,7 +74,7 @@ class ClarificationServiceTest {
     @DisplayName("存在 HIGH+UNRESOLVED 澄清时，ANALYZING→READY 被拦截 (WF-003)")
     void highUnresolvedBlocksAnalyzingToReady() {
         when(workItemMapper.selectById("WI-001")).thenReturn(wi);
-        // Simulate 1 HIGH+UNRESOLVED clarification
+        // 模拟 1 条 HIGH+UNRESOLVED 澄清
         when(clarificationMapper.selectCount(any())).thenReturn(1L);
 
         TransitionRequest req = new TransitionRequest(WorkItemStatus.READY, "分析完成", "user1");
@@ -119,7 +118,7 @@ class ClarificationServiceTest {
     @DisplayName("HIGH+UNRESOLVED 不拦截 ANALYZING→DRAFT (非 READY/IN_DEVELOPMENT)")
     void highUnresolvedDoesNotBlockAnalyzingToDraft() {
         when(workItemMapper.selectById("WI-001")).thenReturn(wi);
-        // Even with blockers, going back to DRAFT is fine — no blocker check needed
+        // 即使有拦截项，退回 DRAFT 也是允许的 —— 无需检查拦截
         when(transitionMapper.insert(any())).thenReturn(1);
         when(workItemMapper.updateById(any())).thenReturn(1);
         when(workItemService.toWorkItemResponse(any())).thenReturn(

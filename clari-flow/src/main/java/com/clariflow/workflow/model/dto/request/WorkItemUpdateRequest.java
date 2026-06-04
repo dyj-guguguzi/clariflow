@@ -12,44 +12,43 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
- * Request DTO for updating an existing work item.
+ * 更新工作项的请求 DTO。
  *
- * <p>Includes the {@code version} field for optimistic locking.
- * The version must match the current version in the database;
- * otherwise a {@code WF-005 VERSION_CONFLICT} error is returned.</p>
+ * <p>包含用于乐观锁的 {@code version} 字段。
+ * version 必须与数据库中的当前版本一致，否则返回 {@code WF-005 VERSION_CONFLICT} 错误。</p>
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkItemUpdateRequest {
 
-    /** Updated title — optional, max 200 chars. */
+    /** 更新后的标题 — 可选，最多 200 个字符。 */
     @Size(max = 200, message = "标题不能超过200个字符")
     private String title;
 
-    /** Updated description — optional, max 2000 chars. */
+    /** 更新后的描述 — 可选，最多 2000 个字符。 */
     @Size(max = 2000, message = "描述不能超过2000个字符")
     private String description;
 
-    /** Updated work item type. */
+    /** 更新后的工作项类型。 */
     private WorkItemType type;
 
-    /** Updated priority. */
+    /** 更新后的优先级。 */
     private Priority priority;
 
-    /** Updated assignee. */
+    /** 更新后的负责人。 */
     private String assignee;
 
-    /** Updated tags. */
+    /** 更新后的标签。 */
     private List<String> tags;
 
-    /** Updated acceptance criteria. */
+    /** 更新后的验收标准。 */
     private List<String> acceptanceCriteria;
 
-    /** Updated risk level. */
+    /** 更新后的风险等级。 */
     private Severity riskLevel;
 
-    /** Current version for optimistic locking — required. */
+    /** 乐观锁的当前版本号 — 必填。 */
     @NotNull(message = "版本号不能为空")
     private Integer version;
 }

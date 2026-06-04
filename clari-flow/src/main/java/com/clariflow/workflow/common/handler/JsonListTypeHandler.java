@@ -14,14 +14,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * MyBatis-Plus TypeHandler for {@code List<String>} ↔ JSON.
+ * MyBatis-Plus TypeHandler，用于 {@code List<String>} ↔ JSON 转换。
  *
- * <p>Serializes a Java {@code List<String>} to a JSON array string (VARCHAR)
- * when writing to the database, and deserializes it back when reading.
- * Handles null/empty values gracefully by returning an empty list.</p>
+ * <p>将 Java {@code List<String>} 序列化为 JSON 数组字符串（VARCHAR）
+ * 写入数据库，读取时再反序列化回来。
+ * 对 null/空值进行安全处理，返回空列表。</p>
  *
- * <p>Used for {@code tags} and {@code acceptanceCriteria} fields
- * in the {@code work_item} table.</p>
+ * <p>用于 {@code work_item} 表中的 {@code tags} 和 {@code acceptanceCriteria} 字段。</p>
  */
 @MappedTypes({List.class})
 @MappedJdbcTypes({JdbcType.VARCHAR})
@@ -32,10 +31,10 @@ public class JsonListTypeHandler extends AbstractJsonTypeHandler<List<String>> {
     private static final TypeReference<List<String>> LIST_STRING_TYPE = new TypeReference<List<String>>() {};
 
     /**
-     * Parses a JSON array string into a {@code List<String>}.
+     * 将 JSON 数组字符串解析为 {@code List<String>}。
      *
-     * @param json the JSON array string from the database
-     * @return parsed list, or empty list if null/empty/parse error
+     * @param json 来自数据库的 JSON 数组字符串
+     * @return 解析后的列表，如果为 null/空/解析错误则返回空列表
      */
     @Override
     protected List<String> parse(String json) {
@@ -51,10 +50,10 @@ public class JsonListTypeHandler extends AbstractJsonTypeHandler<List<String>> {
     }
 
     /**
-     * Serializes a {@code List<String>} to a JSON array string.
+     * 将 {@code List<String>} 序列化为 JSON 数组字符串。
      *
-     * @param obj the list to serialize
-     * @return JSON array string, or {@code "[]"} if null/empty
+     * @param obj 要序列化的列表
+     * @return JSON 数组字符串，如果为 null/空则返回 {@code "[]"}
      */
     @Override
     protected String toJson(List<String> obj) {

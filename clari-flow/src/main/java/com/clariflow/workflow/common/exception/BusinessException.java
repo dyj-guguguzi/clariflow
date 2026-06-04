@@ -3,22 +3,21 @@ package com.clariflow.workflow.common.exception;
 import com.clariflow.workflow.common.ErrorCode;
 
 /**
- * Business exception that carries an {@link ErrorCode} for standardized
- * error responses.
+ * 业务异常，携带 {@link ErrorCode} 用于生成标准化的错误响应。
  *
- * <p>Thrown by service-layer methods when business rules are violated.
- * Caught by {@link GlobalExceptionHandler} to produce structured
- * {@code ApiResponse} error payloads.</p>
+ * <p>由 Service 层方法在业务规则被违反时抛出。
+ * 由 {@link GlobalExceptionHandler} 捕获并生成结构化的
+ * {@code ApiResponse} 错误载荷。</p>
  */
 public class BusinessException extends RuntimeException {
 
     private final ErrorCode errorCode;
 
     /**
-     * Constructs a BusinessException with the given error code and detail message.
+     * 使用给定的错误码和详细消息构造 BusinessException。
      *
-     * @param errorCode the standardized error code
-     * @param message   human-readable detail message
+     * @param errorCode 标准错误码
+     * @param message   人类可读的详细消息
      */
     public BusinessException(ErrorCode errorCode, String message) {
         super(message);
@@ -26,9 +25,9 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * Constructs a BusinessException using the error code's default message.
+     * 使用错误码的默认消息构造 BusinessException。
      *
-     * @param errorCode the standardized error code
+     * @param errorCode 标准错误码
      */
     public BusinessException(ErrorCode errorCode) {
         super(errorCode.getMessage());
@@ -36,18 +35,18 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * Returns the associated error code.
+     * 返回关联的错误码。
      *
-     * @return the ErrorCode enum value
+     * @return ErrorCode 枚举值
      */
     public ErrorCode getErrorCode() {
         return errorCode;
     }
 
     /**
-     * Returns the HTTP status code for this error.
+     * 返回此错误对应的 HTTP 状态码。
      *
-     * @return HTTP status code
+     * @return HTTP 状态码
      */
     public int getHttpStatus() {
         return errorCode.getHttpStatus();

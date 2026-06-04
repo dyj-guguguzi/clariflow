@@ -8,26 +8,25 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * MyBatis-Plus configuration.
+ * MyBatis-Plus 配置。
  *
- * <p>Registers the pagination plugin and the optimistic locker interceptor.
- * Pagination supports H2 (MySQL-compatible mode).</p>
+ * <p>注册分页插件和乐观锁拦截器。
+ * 分页支持 H2（兼容 MySQL 模式）。</p>
  */
 @Configuration
 public class MyBatisPlusConfig {
 
     /**
-     * Configures the MyBatis-Plus interceptor chain with pagination
-     * and optimistic locking support.
+     * 配置 MyBatis-Plus 拦截器链，支持分页和乐观锁。
      *
-     * @return configured MybatisPlusInterceptor
+     * @return 配置好的 MybatisPlusInterceptor
      */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        // Pagination plugin (H2 compatible)
+        // 分页插件（兼容 H2）
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.H2));
-        // Optimistic locker plugin (version field)
+        // 乐观锁插件（version 字段）
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         return interceptor;
     }

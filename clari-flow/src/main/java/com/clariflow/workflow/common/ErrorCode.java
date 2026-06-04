@@ -1,10 +1,10 @@
 package com.clariflow.workflow.common;
 
 /**
- * Unified error code enumeration.
+ * 统一错误码枚举。
  *
- * <p>Each error code maps to a specific HTTP status code and carries
- * a human-readable default message for consistent API error responses.</p>
+ * <p>每个错误码映射到一个特定的 HTTP 状态码，
+ * 并携带人类可读的默认消息，用于生成一致的 API 错误响应。</p>
  *
  * <pre>
  *   WF-001 (404): WORK_ITEM_NOT_FOUND     — 工作项不存在
@@ -16,25 +16,25 @@ package com.clariflow.workflow.common;
  */
 public enum ErrorCode {
 
-    /** Work item not found (404). */
+    /** 工作项不存在 (404)。 */
     WF_001(404, "WF-001", "工作项不存在"),
 
-    /** Invalid state transition (422). */
+    /** 非法状态流转 (422)。 */
     WF_002(422, "WF-002", "非法状态流转"),
 
-    /** High-severity unresolved clarification blocks transition (422). */
+    /** 存在未解决的高优先级澄清问题，阻塞流转 (422)。 */
     WF_003(422, "WF-003", "存在未解决的高优先级澄清问题"),
 
-    /** Clarification not found (404). */
+    /** 澄清问题不存在 (404)。 */
     WF_004(404, "WF-004", "澄清问题不存在"),
 
-    /** Version conflict — optimistic lock failure (409). */
+    /** 版本冲突 — 乐观锁失败 (409)。 */
     WF_005(409, "WF-005", "版本冲突，请重试"),
 
-    /** Username already exists (409). */
+    /** 用户名已存在 (409)。 */
     WF_006(409, "WF-006", "用户名已存在"),
 
-    /** Invalid username or password (401). */
+    /** 用户名或密码错误 (401)。 */
     WF_007(401, "WF-007", "用户名或密码错误");
 
     private final int httpStatus;
@@ -48,27 +48,27 @@ public enum ErrorCode {
     }
 
     /**
-     * Returns the HTTP status code for this error.
+     * 返回此错误对应的 HTTP 状态码。
      *
-     * @return HTTP status code (404, 409, 422)
+     * @return HTTP 状态码（404、409、422）
      */
     public int getHttpStatus() {
         return httpStatus;
     }
 
     /**
-     * Returns the error code string.
+     * 返回错误码字符串。
      *
-     * @return error code (e.g. "WF-001")
+     * @return 错误码（例如 "WF-001"）
      */
     public String getCode() {
         return code;
     }
 
     /**
-     * Returns the default human-readable message.
+     * 返回默认的人类可读消息。
      *
-     * @return default error message
+     * @return 默认错误消息
      */
     public String getMessage() {
         return message;

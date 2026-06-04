@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link ClarificationService}.
+ * {@link ClarificationService} 的实现。
  *
- * <p>Manages clarification lifecycle: creation, listing, and resolution.
- * Ensures work item existence before any operation.</p>
+ * <p>管理澄清问题的生命周期：创建、列表和解决。
+ * 在执行任何操作之前确保工作项存在。</p>
  */
 @Service
 public class ClarificationServiceImpl implements ClarificationService {
@@ -41,7 +41,7 @@ public class ClarificationServiceImpl implements ClarificationService {
 
     @Override
     public ClarificationResponse addClarification(String workItemId, ClarificationCreateRequest request) {
-        // Verify work item exists
+        // 验证工作项存在
         WorkItem workItem = workItemMapper.selectById(workItemId);
         if (workItem == null) {
             throw new BusinessException(ErrorCode.WF_001, "工作项 " + workItemId + " 不存在");
@@ -64,7 +64,7 @@ public class ClarificationServiceImpl implements ClarificationService {
 
     @Override
     public List<ClarificationResponse> getClarifications(String workItemId) {
-        // Verify work item exists
+        // 验证工作项存在
         WorkItem workItem = workItemMapper.selectById(workItemId);
         if (workItem == null) {
             throw new BusinessException(ErrorCode.WF_001, "工作项 " + workItemId + " 不存在");
@@ -83,20 +83,20 @@ public class ClarificationServiceImpl implements ClarificationService {
     @Override
     public ClarificationResponse resolveClarification(String workItemId, Long clarificationId,
                                                        ClarificationResolveRequest request) {
-        // Verify work item exists
+        // 验证工作项存在
         WorkItem workItem = workItemMapper.selectById(workItemId);
         if (workItem == null) {
             throw new BusinessException(ErrorCode.WF_001, "工作项 " + workItemId + " 不存在");
         }
 
-        // Find the clarification
+        // 查找澄清问题
         Clarification clarification = clarificationMapper.selectById(clarificationId);
         if (clarification == null || !clarification.getWorkItemId().equals(workItemId)) {
             throw new BusinessException(ErrorCode.WF_004,
                     "澄清问题 " + clarificationId + " 不存在或不属于工作项 " + workItemId);
         }
 
-        // Update to RESOLVED
+        // 更新为已解决
         clarification.setStatus(ClarificationStatus.RESOLVED);
         clarification.setAnswer(request.getAnswer());
         clarification.setResolvedAt(LocalDateTime.now());
@@ -108,10 +108,10 @@ public class ClarificationServiceImpl implements ClarificationService {
     }
 
     /**
-     * Converts a Clarification entity to its response DTO.
+     * 将 Clarification 实体转换为其响应 DTO。
      *
-     * @param clarification the entity
-     * @return the response DTO
+     * @param clarification 实体
+     * @return 响应 DTO
      */
     private ClarificationResponse toResponse(Clarification clarification) {
         return ClarificationResponse.builder()

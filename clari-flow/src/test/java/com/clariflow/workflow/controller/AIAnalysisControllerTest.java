@@ -28,10 +28,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * API tests for {@link AIAnalysisController}.
+ * {@link AIAnalysisController} 的 API 测试。
  *
- * <p>Covers POST /api/work-items/{id}/ai-analysis with success,
- * not-found, and fallback scenarios.</p>
+ * <p>覆盖 POST /api/work-items/{id}/ai-analysis 的成功、不存在和降级场景。</p>
  */
 @WebMvcTest(value = AIAnalysisController.class,
         excludeAutoConfiguration = {
@@ -61,7 +60,7 @@ class AIAnalysisControllerTest {
     @MockBean
     private WorkItemTransitionMapper workItemTransitionMapper;
 
-    // ── Helpers ──
+    // ── 辅助方法 ──
 
     private AIAnalysisResponse buildAnalysisResponse() {
         return AIAnalysisResponse.builder()
@@ -77,7 +76,7 @@ class AIAnalysisControllerTest {
                 .build();
     }
 
-    // ── Tests ──
+    // ── 测试方法 ──
 
     @Nested
     @DisplayName("POST /api/work-items/{id}/ai-analysis — 触发 AI 分析")

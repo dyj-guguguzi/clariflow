@@ -3,19 +3,19 @@ package com.clariflow.workflow.service;
 import com.clariflow.workflow.model.dto.response.AIAnalysisResponse;
 
 /**
- * Service interface for AI-powered work item analysis.
+ * AI 驱动的工作项分析服务接口。
  *
- * <p>Analyzes a work item's title and description to generate
- * structured insights including a summary, identified risks,
- * and actionable suggestions.</p>
+ * <p>分析工作项的标题和描述，生成结构化洞察，
+ * 包括摘要、已识别风险
+ * 和可操作建议。</p>
  */
 public interface AIAnalysisService {
 
     /**
-     * Analyzes a work item and generates structured AI insights.
+     * 分析工作项并生成结构化的 AI 洞察。
      *
-     * @param workItemId the work item ID to analyze
-     * @return structured analysis response
+     * @param workItemId 要分析的工作项 ID
+     * @return 结构化分析响应
      */
     AIAnalysisResponse analyze(String workItemId);
 }

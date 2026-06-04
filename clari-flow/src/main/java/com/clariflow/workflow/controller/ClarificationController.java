@@ -15,10 +15,10 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * REST controller for clarification management.
+ * 澄清问题管理的 REST 控制器。
  *
- * <p>Provides endpoints for creating, listing, and resolving
- * clarification questions on work items.</p>
+ * <p>提供对工作项澄清问题的创建、列表和
+ * 解决接口。</p>
  */
 @RestController
 @RequestMapping("/api/work-items/{workItemId}/clarifications")
@@ -32,11 +32,11 @@ public class ClarificationController {
     }
 
     /**
-     * Adds a clarification question to a work item.
+     * 向工作项添加澄清问题。
      *
-     * @param workItemId the parent work item ID
-     * @param request    the clarification creation request
-     * @return the created clarification
+     * @param workItemId 父工作项 ID
+     * @param request    澄清问题创建请求
+     * @return 已创建的澄清问题
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -49,10 +49,10 @@ public class ClarificationController {
     }
 
     /**
-     * Lists all clarifications for a work item.
+     * 列出工作项的所有澄清问题。
      *
-     * @param workItemId the parent work item ID
-     * @return list of clarification responses
+     * @param workItemId 父工作项 ID
+     * @return 澄清问题响应列表
      */
     @GetMapping
     @Operation(summary = "获取澄清问题列表", description = "获取指定工作项的所有澄清问题")
@@ -63,12 +63,12 @@ public class ClarificationController {
     }
 
     /**
-     * Resolves a clarification by providing an answer.
+     * 通过提供答案解决澄清问题。
      *
-     * @param workItemId       the parent work item ID
-     * @param clarificationId  the clarification ID to resolve
-     * @param request          the resolve request (answer)
-     * @return the updated clarification
+     * @param workItemId      父工作项 ID
+     * @param clarificationId 要解决的澄清问题 ID
+     * @param request         解决请求（答案）
+     * @return 更新后的澄清问题
      */
     @PutMapping("/{clarificationId}/resolve")
     @Operation(summary = "解决澄清问题", description = "为澄清问题提供答案并将其标记为已解决")

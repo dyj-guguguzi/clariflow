@@ -10,10 +10,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * AI analysis result response.
+ * AI 分析结果响应。
  *
- * <p>Contains a structured mock analysis of the work item including
- * a summary, identified risks, and actionable suggestions.</p>
+ * <p>包含对工作项的结构化模拟分析，包括摘要、识别的风险和可操作的建议。</p>
  */
 @Data
 @Builder
@@ -21,30 +20,30 @@ import java.util.List;
 @AllArgsConstructor
 public class AIAnalysisResponse {
 
-    /** Executive summary of the analysis. */
+    /** 分析概要摘要。 */
     private String summary;
 
-    /** Identified risks with severity levels. */
+    /** 识别的风险及严重程度。 */
     private List<RiskItem> risks;
 
-    /** Actionable suggestions. */
+    /** 可操作的建议。 */
     private List<String> suggestions;
 
-    /** Timestamp when the analysis was performed. */
+    /** 分析执行的时间戳。 */
     private LocalDateTime analyzedAt;
 
     /**
-     * A single risk item identified during AI analysis.
+     * AI 分析中识别的单个风险项。
      */
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class RiskItem {
 
-        /** Severity level of the risk. */
+        /** 风险的严重程度。 */
         private Severity level;
 
-        /** Description of the risk. */
+        /** 风险描述。 */
         private String description;
     }
 }

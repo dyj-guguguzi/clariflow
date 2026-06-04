@@ -28,10 +28,10 @@ import java.util.Map;
 /**
  * Redis + Spring Cache configuration — 含 Redis 不可用时降级。
  *
- * <p>Cache TTL:
+ * <p>缓存 TTL：
  * <ul>
- *   <li>workItems: 5 min</li>
- *   <li>aiAnalysis: 1 hour</li>
+ *   <li>workItems：5 分钟</li>
+ *   <li>aiAnalysis：1 小时</li>
  * </ul>
  */
 @Configuration

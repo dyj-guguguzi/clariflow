@@ -1,16 +1,16 @@
 package com.clariflow.workflow.model.enums;
 
 /**
- * Work item type enumeration.
+ * 工作项类型枚举。
  */
 public enum WorkItemType {
 
-    /** User story — feature or functionality from end-user perspective. */
+    /** 用户故事 — 从最终用户视角描述的功能特性。 */
     STORY,
 
-    /** Bug — defect or error that needs to be fixed. */
+    /** 缺陷 — 需要修复的缺陷或错误。 */
     BUG,
 
-    /** Task — general development or operational task. */
+    /** 任务 — 通用开发或运维任务。 */
     TASK
 }

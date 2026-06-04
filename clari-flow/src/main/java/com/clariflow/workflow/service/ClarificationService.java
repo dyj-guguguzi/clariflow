@@ -7,38 +7,38 @@ import com.clariflow.workflow.model.dto.response.ClarificationResponse;
 import java.util.List;
 
 /**
- * Service interface for clarification question management.
+ * 澄清问题管理的服务接口。
  *
- * <p>Clarifications help identify and resolve ambiguities in work item
- * requirements before development begins. HIGH-severity unresolved
- * clarifications block transitions to READY and IN_DEVELOPMENT.</p>
+ * <p>澄清问题用于识别和解决工作项需求中的模糊之处，
+ * 在开发开始之前进行。HIGH 级别未解决的澄清问题会阻塞
+ * 向 READY 和 IN_DEVELOPMENT 状态的流转。</p>
  */
 public interface ClarificationService {
 
     /**
-     * Adds a clarification question to a work item.
+     * 向工作项添加澄清问题。
      *
-     * @param workItemId the parent work item ID
-     * @param request    the clarification creation request
-     * @return the created clarification response
+     * @param workItemId 父工作项 ID
+     * @param request    澄清问题创建请求
+     * @return 已创建的澄清问题响应
      */
     ClarificationResponse addClarification(String workItemId, ClarificationCreateRequest request);
 
     /**
-     * Retrieves all clarifications for a work item.
+     * 获取工作项的所有澄清问题。
      *
-     * @param workItemId the parent work item ID
-     * @return list of clarification responses
+     * @param workItemId 父工作项 ID
+     * @return 澄清问题响应列表
      */
     List<ClarificationResponse> getClarifications(String workItemId);
 
     /**
-     * Resolves a clarification by providing an answer.
+     * 通过提供答案解决澄清问题。
      *
-     * @param workItemId       the parent work item ID
-     * @param clarificationId  the clarification ID
-     * @param request          the resolve request (answer)
-     * @return the updated clarification response
+     * @param workItemId      父工作项 ID
+     * @param clarificationId 澄清问题 ID
+     * @param request         解决请求（答案）
+     * @return 更新后的澄清问题响应
      */
     ClarificationResponse resolveClarification(String workItemId, Long clarificationId,
                                                 ClarificationResolveRequest request);

@@ -8,14 +8,14 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 /**
- * Request DTO for resolving a clarification.
+ * 解决澄清的请求 DTO。
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClarificationResolveRequest {
 
-    /** Answer to the clarification question — required, max 2000 chars. */
+    /** 澄清问题的答案 — 必填，最多 2000 个字符。 */
     @NotBlank(message = "答案不能为空")
     @Size(max = 2000, message = "答案不能超过2000个字符")
     private String answer;

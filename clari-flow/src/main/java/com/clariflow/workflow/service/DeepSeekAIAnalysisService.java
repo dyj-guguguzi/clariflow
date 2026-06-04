@@ -25,13 +25,13 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * DeepSeek-powered implementation of {@link AIAnalysisService}.
+ * 基于 DeepSeek 的 {@link AIAnalysisService} 实现。
  *
- * <p>Calls DeepSeek Chat API (OpenAI-compatible) to generate
- * structured analysis: summary, risks, and clarification suggestions.</p>
+ * <p>调用 DeepSeek Chat API（兼容 OpenAI 格式）生成
+ * 结构化分析：摘要、风险点和澄清建议。</p>
  *
- * <p>Activated when {@code clariflow.ai.provider=deepseek} (default).
- * Falls back to {@link MockAIAnalysisServiceImpl} otherwise.</p>
+ * <p>当 {@code clariflow.ai.provider=deepseek}（默认值）时激活。
+ * 否则回退到 {@link MockAIAnalysisServiceImpl}。</p>
  */
 @Service
 @ConditionalOnProperty(name = "clariflow.ai.provider", havingValue = "deepseek", matchIfMissing = false)
@@ -89,7 +89,7 @@ public class DeepSeekAIAnalysisService implements AIAnalysisService {
         }
     }
 
-    // ─── Private helpers ─────────────────────────────────────────────
+    // ─── 私有辅助方法 ─────────────────────────────────────────────
 
     private String buildUserMessage(WorkItem wi) {
         StringBuilder sb = new StringBuilder();
@@ -135,7 +135,7 @@ public class DeepSeekAIAnalysisService implements AIAnalysisService {
         String content = body.getChoices().get(0).getMessage().getContent();
         log.debug("DeepSeek response: {}", content);
 
-        // Strip markdown code blocks if present
+        // 如果存在，去除 markdown 代码块标记
         content = content.trim();
         if (content.startsWith("```json")) {
             content = content.substring(7);
@@ -156,7 +156,7 @@ public class DeepSeekAIAnalysisService implements AIAnalysisService {
 
             String summary = safeString(map.get("summary"), "分析结果解析异常");
 
-            // Risks: handle both List and single object
+            // 风险点：同时处理 List 和单个对象
             List<AIAnalysisResponse.RiskItem> risks = new ArrayList<>();
             Object risksObj = map.get("risks");
             if (risksObj instanceof List) {
@@ -168,7 +168,7 @@ public class DeepSeekAIAnalysisService implements AIAnalysisService {
                 }
             }
 
-            // Suggestions: handle both List and single object
+            // 建议：同时处理 List 和单个对象
             List<String> suggestions = new ArrayList<>();
             Object sugObj = map.get("suggestions");
             if (sugObj instanceof List) {

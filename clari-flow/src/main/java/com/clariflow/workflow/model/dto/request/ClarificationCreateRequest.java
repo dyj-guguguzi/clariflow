@@ -10,19 +10,19 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
- * Request DTO for creating a clarification question.
+ * 创建澄清问题的请求 DTO。
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClarificationCreateRequest {
 
-    /** The clarification question — required, max 1000 chars. */
+    /** 澄清问题 — 必填，最多 1000 个字符。 */
     @NotBlank(message = "澄清问题不能为空")
     @Size(max = 1000, message = "澄清问题不能超过1000个字符")
     private String question;
 
-    /** Severity of the clarification. Defaults to MEDIUM. */
+    /** 澄清的严重程度。默认为 MEDIUM。 */
     @NotNull(message = "严重程度不能为空")
     private Severity severity = Severity.MEDIUM;
 }

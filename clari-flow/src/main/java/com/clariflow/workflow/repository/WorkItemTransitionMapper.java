@@ -5,11 +5,11 @@ import com.clariflow.workflow.model.entity.WorkItemTransition;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * MyBatis-Plus mapper for {@link WorkItemTransition}.
+ * {@link WorkItemTransition} 的 MyBatis-Plus Mapper。
  *
- * <p>Inherits standard CRUD operations from {@link BaseMapper}.</p>
+ * <p>继承自 {@link BaseMapper}，拥有标准的 CRUD 操作。</p>
  */
 @Mapper
 public interface WorkItemTransitionMapper extends BaseMapper<WorkItemTransition> {
-    // Standard CRUD inherited from BaseMapper<WorkItemTransition>
+    // 标准 CRUD 继承自 BaseMapper<WorkItemTransition>
 }

@@ -33,9 +33,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * API tests for {@link ClarificationController}.
+ * {@link ClarificationController} 的 API 测试。
  *
- * <p>Covers all 3 endpoints: POST (create), GET (list), PUT (resolve).</p>
+ * <p>覆盖全部 3 个端点：POST（创建）、GET（列表）、PUT（解决）。</p>
  */
 @WebMvcTest(value = ClarificationController.class,
         excludeAutoConfiguration = {
@@ -65,7 +65,7 @@ class ClarificationControllerTest {
     @MockBean
     private WorkItemTransitionMapper workItemTransitionMapper;
 
-    // ── Helpers ──
+    // ── 辅助方法 ──
 
     private ClarificationResponse buildResponse(Long id, String workItemId) {
         return ClarificationResponse.builder()

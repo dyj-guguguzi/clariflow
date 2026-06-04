@@ -28,9 +28,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link TransitionServiceImpl} — covers all valid
- * and invalid state transitions, HIGH clarification blocking rules,
- * and optimistic lock conflict handling.
+ * {@link TransitionServiceImpl} 的单元测试 —— 覆盖所有合法与非法状态流转、
+ * HIGH 级别澄清拦截规则以及乐观锁冲突处理。
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("TransitionService — 状态流转核心测试")
@@ -69,7 +68,7 @@ class TransitionServiceTest {
         return wi;
     }
 
-    // ── Valid Transitions ──
+    // ── 合法流转 ──
 
     @Nested
     @DisplayName("合法流转测试")
@@ -197,7 +196,7 @@ class TransitionServiceTest {
         }
     }
 
-    // ── Invalid Transitions ──
+    // ── 非法流转 ──
 
     @Nested
     @DisplayName("非法流转测试")
@@ -457,7 +456,7 @@ class TransitionServiceTest {
         }
     }
 
-    // ── Version Conflict ──
+    // ── 版本冲突 ──
 
     @Nested
     @DisplayName("版本冲突测试")
@@ -468,7 +467,7 @@ class TransitionServiceTest {
         void versionConflict() {
             WorkItem wi = createWorkItem("WI-001", WorkItemStatus.DRAFT);
             when(workItemMapper.selectById("WI-001")).thenReturn(wi);
-            when(workItemMapper.updateById(any())).thenReturn(0); // Simulate conflict
+            when(workItemMapper.updateById(any())).thenReturn(0); // 模拟冲突
 
             TransitionRequest req = new TransitionRequest(WorkItemStatus.ANALYZING, "尝试流转", "user1");
             BusinessException ex = assertThrows(BusinessException.class,
@@ -478,7 +477,7 @@ class TransitionServiceTest {
         }
     }
 
-    // ── Work Item Not Found ──
+    // ── 工作项不存在 ──
 
     @Test
     @DisplayName("工作项不存在返回 WF-001")

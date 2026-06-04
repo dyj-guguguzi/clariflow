@@ -5,10 +5,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * ClariFlow WorkItem Flow Application
+ * ClariFlow 工作项流转应用
  *
- * <p>Spring Boot entry point for the work item state flow management system.
- * Scans MyBatis-Plus mappers under the repository package.</p>
+ * <p>工作项状态流转管理系统的 Spring Boot 入口。
+ * 在 repository 包下扫描 MyBatis-Plus Mapper。</p>
  */
 @SpringBootApplication
 @MapperScan("com.clariflow.workflow.repository")

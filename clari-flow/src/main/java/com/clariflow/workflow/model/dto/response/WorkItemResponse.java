@@ -13,8 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Full work item detail response — includes clarifications, transitions,
- * and optional AI analysis result.
+ * 工作项完整详情响应 — 包含澄清列表、流转记录和可选的 AI 分析结果。
  */
 @Data
 @Builder
@@ -22,51 +21,51 @@ import java.util.List;
 @AllArgsConstructor
 public class WorkItemResponse {
 
-    /** Unique identifier, e.g. "WI-001". */
+    /** 唯一标识符，例如 "WI-001"。 */
     private String id;
 
-    /** Title / summary of the work item. */
+    /** 工作项的标题/摘要。 */
     private String title;
 
-    /** Detailed description. */
+    /** 详细描述。 */
     private String description;
 
-    /** Type of work item. */
+    /** 工作项类型。 */
     private WorkItemType type;
 
-    /** Priority level. */
+    /** 优先级。 */
     private Priority priority;
 
-    /** Current status. */
+    /** 当前状态。 */
     private WorkItemStatus status;
 
-    /** Assigned person. */
+    /** 负责人。 */
     private String assignee;
 
-    /** Tags list. */
+    /** 标签列表。 */
     private List<String> tags;
 
-    /** Acceptance criteria list. */
+    /** 验收标准列表。 */
     private List<String> acceptanceCriteria;
 
-    /** Risk level. */
+    /** 风险等级。 */
     private Severity riskLevel;
 
-    /** Current optimistic lock version. */
+    /** 当前乐观锁版本号。 */
     private Integer version;
 
-    /** Creation timestamp. */
+    /** 创建时间戳。 */
     private LocalDateTime createdAt;
 
-    /** Last update timestamp. */
+    /** 最后更新时间戳。 */
     private LocalDateTime updatedAt;
 
-    /** Associated clarifications (may be empty). */
+    /** 关联的澄清列表（可能为空）。 */
     private List<ClarificationResponse> clarifications;
 
-    /** Transition history (may be empty). */
+    /** 流转历史记录（可能为空）。 */
     private List<TransitionResponse> transitions;
 
-    /** Latest AI analysis result (may be null). */
+    /** 最新的 AI 分析结果（可能为 null）。 */
     private AIAnalysisResponse aiAnalysis;
 }

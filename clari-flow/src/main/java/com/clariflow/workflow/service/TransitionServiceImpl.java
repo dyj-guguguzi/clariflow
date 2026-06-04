@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link TransitionService} — the state machine core.
+ * {@link TransitionService} 的实现——状态机核心。
  *
- * <p>All state transition logic is centralized here. The
- * {@link #executeTransition} method is {@code @Transactional}
- * to ensure atomicity of validation, update, and history recording.</p>
+ * <p>所有状态流转逻辑集中在此处。
+ * {@link #executeTransition} 方法标记为 {@code @Transactional}
+ * 以确保验证、更新和历史记录写入的原子性。</p>
  */
 @Service
 public class TransitionServiceImpl implements TransitionService {
@@ -57,7 +57,7 @@ public class TransitionServiceImpl implements TransitionService {
     @Transactional
     @CacheEvict(value = "workItems", allEntries = true)
     public WorkItemResponse executeTransition(String workItemId, TransitionRequest request) {
-        // 1. Retrieve current work item
+        // 1. 获取当前工作项
         WorkItem workItem = workItemMapper.selectById(workItemId);
         if (workItem == null) {
             throw new BusinessException(ErrorCode.WF_001, "工作项 " + workItemId + " 不存在");
@@ -66,15 +66,15 @@ public class TransitionServiceImpl implements TransitionService {
         WorkItemStatus currentStatus = workItem.getStatus();
         WorkItemStatus targetStatus = request.getTargetStatus();
 
-        // 2. Validate state transition legality (WF-002)
+        // 2. 验证状态流转合法性（WF-002）
         if (!currentStatus.canTransitionTo(targetStatus)) {
             String msg = String.format("非法状态流转: %s → %s 不被允许", currentStatus, targetStatus);
             log.warn("Invalid transition: workItemId={}, {} -> {}", workItemId, currentStatus, targetStatus);
             throw new BusinessException(ErrorCode.WF_002, msg);
         }
 
-        // 3. Check for HIGH+UNRESOLVED clarification blockers (WF-003)
-        //    This check applies when transitioning TO READY or IN_DEVELOPMENT
+        // 3. 检查是否有 HIGH+UNRESOLVED 的澄清阻塞（WF-003）
+        //    此检查在目标状态为 READY 或 IN_DEVELOPMENT 时执行
         if (targetStatus == WorkItemStatus.READY || targetStatus == WorkItemStatus.IN_DEVELOPMENT) {
             long blockerCount = clarificationMapper.selectCount(
                     new LambdaQueryWrapper<Clarification>()
@@ -91,11 +91,11 @@ public class TransitionServiceImpl implements TransitionService {
             }
         }
 
-        // 4. Update status with optimistic locking (WF-005)
+        // 4. 使用乐观锁更新状态（WF-005）
         WorkItemStatus previousStatus = currentStatus;
         workItem.setStatus(targetStatus);
         workItem.setUpdatedAt(LocalDateTime.now());
-        // version field is already set and will be auto-incremented by MyBatis-Plus @Version
+        // version 字段已经设置，MyBatis-Plus 的 @Version 会自动递增
 
         int rows = workItemMapper.updateById(workItem);
         if (rows == 0) {
@@ -103,7 +103,7 @@ public class TransitionServiceImpl implements TransitionService {
             throw new BusinessException(ErrorCode.WF_005, "版本冲突，请刷新后重试");
         }
 
-        // 5. Record transition history
+        // 5. 记录流转历史
         WorkItemTransition transition = new WorkItemTransition();
         transition.setWorkItemId(workItemId);
         transition.setFromStatus(previousStatus);
@@ -118,13 +118,13 @@ public class TransitionServiceImpl implements TransitionService {
         log.info("Transition executed: workItemId={}, {} -> {}, operator={}",
                 workItemId, previousStatus, targetStatus, operator);
 
-        // 6. Return updated WorkItemResponse (re-read to get latest version)
+        // 6. 返回更新后的 WorkItemResponse（重新查询以获取最新版本）
         return workItemService.toWorkItemResponse(workItemMapper.selectById(workItemId));
     }
 
     @Override
     public List<TransitionResponse> getTransitionHistory(String workItemId) {
-        // Verify work item exists
+        // 验证工作项存在
         WorkItem workItem = workItemMapper.selectById(workItemId);
         if (workItem == null) {
             throw new BusinessException(ErrorCode.WF_001, "工作项 " + workItemId + " 不存在");

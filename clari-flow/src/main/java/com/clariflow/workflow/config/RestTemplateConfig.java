@@ -6,7 +6,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * RestTemplate configuration for external API calls (DeepSeek etc).
+ * RestTemplate 配置，用于外部 API 调用（DeepSeek 等）。
  */
 @Configuration
 public class RestTemplateConfig {
