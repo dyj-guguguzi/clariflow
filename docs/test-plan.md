@@ -10,7 +10,8 @@
 - 澄清问题 API（创建/列表/解决 + 输入校验）
 - AI 分析 API（成功/404/降级）
 - DeepSeek 真实 AI 调用
-- 用户认证 API（注册/登录）
+- 用户认证 API（注册/登录/登出）
+- JWT Token 黑名单机制（Redis）
 - Playwright E2E 浏览器端完整流程测试
 
 测试环境：
@@ -30,6 +31,9 @@
 | LOW 澄清不阻断 | ClarificationServiceTest：添加 LOW 未解决 → 尝试 READY → 验证成功 | ✅ 通过 |
 | 回退不受澄清影响 | ClarificationServiceTest：HIGH 未解决 → ANALYZING→DRAFT → 验证成功 | ✅ 通过 |
 | 乐观锁冲突 | WorkItemControllerTest：并发更新 → 验证 409 + WF-005 | ✅ 通过 |
+| 删除级联 | API 验证：DELETE 工作项 → 关联 clarification 和 transition 同步清除 | ✅ 通过 |
+| JWT 认证拦截 | API 验证：无 Token → 401，过期 Token → 401 | ✅ 通过 |
+| Cookie 页面鉴权 | 无认证 Cookie → 302 /login.html | ✅ 通过 |
 | 删除级联 | API 验证：DELETE 工作项 → 关联 clarification 和 transition 同步清除 | ✅ 通过 |
 
 ## 3. 状态流转测试
@@ -99,4 +103,5 @@ COMPLETED → DRAFT, ANALYZING, READY, IN_DEVELOPMENT, TESTING
 | 大数据量列表性能 | 当前无分页，列表全量返回 | 生产迁移时加 MyBatis-Plus 分页插件 |
 | H2 文件损坏 | 文件持久化模式有数据损坏风险 | 定期备份 data/ 目录，生产迁移至 MySQL |
 | AI 服务不可用 | DeepSeek API 调用失败时依赖 @ConditionalOnMissingBean 的 Mock 备选 | 当前 Mock 备用已就绪，生产可接告警 |
+| Redis 不可用时黑名单降级 | Token 黑名单依赖 Redis，不可用时黑名单失效 | `isTokenBlacklisted()` 返回 false 降级放行，Cookie 页面鉴权仍有效 |
 | 前端兼容性 | 仅开发阶段在 Chrome 测试 | 生产替换为 React/Vue 前端框架 |

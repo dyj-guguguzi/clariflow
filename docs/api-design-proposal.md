@@ -17,7 +17,7 @@ API 文档入口：
 | WorkItem | `/api/work-items` | 工作项 CRUD + 状态流转 + 删除 |
 | Clarification | `/api/work-items/{workItemId}/clarifications` | 澄清问题管理 |
 | AI Analysis | `/api/work-items/{workItemId}/ai-analysis` | AI 分析触发 |
-| Auth | `/api/auth` | 用户注册/登录，JWT Token 签发 |
+| Auth | `/api/auth` | 用户注册/登录/登出，JWT Token + Cookie 双重鉴权 |
 
 采用 REST 风格：资源路径表示实体，HTTP 方法表示操作。
 
@@ -37,7 +37,9 @@ API 文档入口：
 | 解决澄清 | PUT `/api/work-items/{workItemId}/clarifications/{clarificationId}/resolve` | ClarificationResolveRequest | ApiResponse\<ClarificationResponse\> | status→RESOLVED, 记录 resolvedAt |
 | AI 分析 | POST `/api/work-items/{workItemId}/ai-analysis` | — | ApiResponse\<AIAnalysisResponse\> | 返回 summary + risks + suggestions |
 | 用户注册 | POST `/api/auth/register` | RegisterRequest | ApiResponse\<LoginResponse\> | BCrypt 加密, 返回 JWT |
-| 用户登录 | POST `/api/auth/login` | LoginRequest | ApiResponse\<LoginResponse\> | 返回 JWT token + 角色信息 |
+| 用户登录 | POST `/api/auth/login` | LoginRequest | ApiResponse\<LoginResponse\> | 返回 JWT token + 角色信息，设置认证 Cookie |
+| 用户登出 | POST `/api/auth/logout` | Authorization Header | ApiResponse\<Void\> | Token 加入 Redis 黑名单，清除认证 Cookie |
+| 用户列表 | GET `/api/users` | — | ApiResponse\<List\<String\>\> | 返回所有用户名，供前端下拉选择 |
 
 ### 统一响应格式
 
@@ -68,6 +70,9 @@ API 文档入口：
 | 409 | WF-005 | 版本冲突 | 乐观锁 version 不匹配 |
 | 404 | WF-001 | 工作项不存在 | ID 不在数据库中 |
 | 404 | WF-004 | 澄清问题不存在 | clarification ID 无效 |
+| 401 | — | 未登录或 Token 已失效 | API 请求无有效 JWT Token |
+| 409 | WF-006 | 用户名已存在 | 注册时用户名重复 |
+| 401 | WF-007 | 用户名或密码错误 | 登录凭据不匹配 |
 
 设计理念：HTTP 状态码表示错误类别（客户端错误 vs 服务端错误），业务错误码（WF-xxx）提供精确语义，前端可据此做差异化处理。
 
@@ -104,29 +109,59 @@ DeepSeek 返回示例：
 }
 ```
 
-## 6. 前后端协作说明
+## 6. 认证机制
 
-前端（index.html）通过 Fetch API 调用后端：
+采用 **JWT + Cookie 双重防护**：
+
+```
+登录成功
+  → Set-Cookie: clariflow_authenticated=true; HttpOnly; Path=/
+  → 返回 JWT Token → 前端存 localStorage
+
+页面访问 (非 API)
+  → JwtAuthFilter 检查 Cookie → 无 → 302 /login.html
+
+API 调用 (/api/**)
+  → Authorization: Bearer <token>
+  → JwtAuthFilter 验证 JWT（含 Redis 黑名单）→ 无效 → 401
+
+登出
+  → POST /api/auth/logout
+  → Token 加入 Redis 黑名单（TTL = 剩余有效期）
+  → 清除 Cookie（Max-Age=0）
+  → 前端清 localStorage → 跳转登录页
+```
+
+**前端防线**：`index.html` 加载时检查 `localStorage.token`，无 token 直接 `window.location.replace('/login.html')`。
+
+## 7. 前后端协作说明
+
+前端（index.html）通过 Fetch API 调用后端，所有请求携带 JWT：
 ```javascript
-// 获取列表
-const resp = await fetch('/api/work-items');
+// 获取列表（带认证）
+const resp = await fetch('/api/work-items', {
+  headers: { 'Authorization': 'Bearer ' + token }
+});
 const { data } = await resp.json();
-// data 为 WorkItemListItemResponse 数组
 
 // 状态流转
 const resp = await fetch(`/api/work-items/${id}/transitions`, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ targetStatus, reason, operator })
+  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+  body: JSON.stringify({ targetStatus, reason })
 });
 if (resp.status === 422) {
   // 显示错误信息（WF-002 或 WF-003）
+}
+if (resp.status === 401) {
+  // Token 失效，跳转登录页
+  window.location.href = '/login.html';
 }
 ```
 
 前端状态流转按钮根据服务端返回的 `WorkItemStatus.getAllowedTargets()` 逻辑动态生成，前后端状态规则完全一致。
 
-## 7. 后续扩展
+## 8. 后续扩展
 
 专业前端工程化后需要补充的 API：
 - 批量更新工作项（支持看板拖拽）

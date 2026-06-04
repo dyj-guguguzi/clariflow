@@ -10,7 +10,8 @@
 | 核心业务规则 | HIGH 未解决 → 阻断 READY/IN_DEVELOPMENT，回退不受影响，COMPLETED 为终态 | ✅ |
 | AI 分析 | DeepSeek 真实 API + Mock 回退，结构化返回 | ✅ |
 | 前端页面 | 全中文单页面，覆盖完整闭环（创建→流转→澄清→AI分析→删除），含登录注册页 | ✅ |
-| 用户认证 | JWT Token + BCrypt 加密 + 登录/注册接口 + 演示账号初始化 | ✅ |
+| 用户认证 | JWT + BCrypt + Cookie 双重鉴权 + Redis Token 黑名单登出 + 登录/注册/登出接口 | ✅ |
+| 代码规范 | 49 个 Java 文件全量注释中文化，保留 Javadoc 标签 | ✅ |
 | 测试 | 63 用例，5 类测试，100% 通过 | ✅ |
 | 加分项 | Knife4j + Docker + Redis + 用户上下文 + JWT 认证 + 删除功能 + COMPLETED 终态 — 全部完成 | ✅ |
 
@@ -19,7 +20,7 @@
 1. **单一真相源状态机**：`WorkItemStatus` 枚举的 `getAllowedTargets()` 是唯一流转规则来源，前后端共享；**COMPLETED 为终态**，不可再流转
 2. **AI 服务可插拔**：`AIAnalysisService` 接口 + `@ConditionalOnProperty`，Mock ↔ DeepSeek 一行配置切换
 3. **Redis 优雅降级**：启动时探测 Redis，不可用时自动回退 `ConcurrentMapCacheManager`，不影响业务
-4. **JWT + BCrypt 认证**：`sys_user` 表 + `/api/auth/register|login` + `JwtAuthFilter`，演示账号自动初始化，登录页持久化 token
+4. **JWT + Cookie 双重鉴权**：`sys_user` 表 + `/api/auth/register|login|logout` + `JwtAuthFilter`（Cookie 页面鉴权 + JWT API 鉴权 + Redis 黑名单），前端防线双重保护
 5. **乐观锁 + 统一错误码**：WF-001~007 涵盖所有异常场景，前端可按码分流处理
 
 ## 3. 可改进之处

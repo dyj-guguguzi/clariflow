@@ -75,6 +75,11 @@
 3. **DELETE 返回 204 导致前端 JSON 解析失败**：`@ResponseStatus(HttpStatus.NO_CONTENT)` 返回空响应体，前端 `res.json()` 报错 → 移除 204 注解，改为正常 200 返回 JSON
 4. **COMPLETED 非终态**：已完成工作项允许回退到 TESTING → 将 `COMPLETED.getAllowedTargets()` 改为 `Collections.emptyList()`，前端同步移除
 5. **流转历史不显示流转原因**：详情面板只显示状态/操作人/时间，缺少 reason 字段 → 添加 `「${esc(t.reason)}」` 显示
+6. **退出登录后可绕过认证**：`JwtAuthFilter` 白名单中 `!path.startsWith("/api/")` 放行所有页面 → 收紧白名单，增加 Cookie 页面鉴权 + API 返回 401 + Redis Token 黑名单 + 前端防线
+7. **流转操作人应默认当前用户**：弹窗中可手动输入操作人 → 隐藏输入框，改为只读展示当前登录用户名
+8. **负责人输入框应为下拉选择**：纯文本输入 → 改为原生 `<select>`（单选，不可编辑），数据来自 `GET /api/users`
+9. **注释英译中**：49 个 Java 文件所有注释翻译为中文
+10. **文档更新**：api-design-proposal.md, process.md, self-evaluation.md, test-plan.md 同步所有变更
 
 ## 8. 验证记录
 
@@ -90,11 +95,12 @@
 | Knife4j 文档 | 浏览器访问 /doc.html | 200 原生 UI 正常渲染 |
 | 前端页面 | 浏览器访问 index.html | 全中文界面 200 |
 | Docker Compose | `docker compose up` | Redis + App 一键启动 |
-| Playwright E2E | 浏览器自动化：登录→创建→流转→查看历史→删除 | 全流程通过 |
+| Playwright E2E | 浏览器自动化：登录→创建→流转→查看历史→删除→登出→重访受阻 | 全流程通过 |
+| 登出安全验证 | 登出后访问 / → 302 /login.html，API 无 token → 401 | Token 黑名单 + Cookie 双重防护 ✅ |
 
 ## 9. 取舍说明
 
-- **已完成**用户认证 → JWT Token + BCrypt 密码加密，`sys_user` 表 + `/api/auth/register|login` 接口，前端登录页面
+- **已完成**用户认证 → JWT Token + BCrypt 密码加密 + Cookie 双重鉴权 + Redis Token 黑名单登出，`sys_user` 表 + `/api/auth/register|login|logout` 接口
 - **已完成**删除功能 → 全栈 DELETE 端点 + 级联删除 + 前端确认弹窗
 - **已完成**Docker Compose → Redis 7-alpine + App 容器编排
 - **已完成**真实 LLM 集成 → DeepSeek API，Mock 作为 `@ConditionalOnMissingBean` 备用
