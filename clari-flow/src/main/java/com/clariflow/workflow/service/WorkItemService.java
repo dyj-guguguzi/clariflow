@@ -52,4 +52,11 @@ public interface WorkItemService {
      * @return the updated work item response
      */
     WorkItemResponse updateWorkItem(String id, WorkItemUpdateRequest request);
+
+    /**
+     * Deletes a work item and all its associated clarifications and transitions.
+     *
+     * @param id the work item ID
+     */
+    void deleteWorkItem(String id);
 }

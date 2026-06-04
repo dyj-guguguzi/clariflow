@@ -4,22 +4,23 @@
 
 | 维度 | 完成情况 | 自评 |
 |------|----------|------|
-| 工作项管理 | 完整 CRUD，含类型/优先级/标签/验收标准/风险等级 | ✅ |
-| 状态流转 | 6 状态引擎 + 合法/非法拦截 + 历史记录 + 乐观锁 | ✅ |
+| 工作项管理 | 完整 CRUD + 删除（级联清除关联数据） | ✅ |
+| 状态流转 | 6 状态引擎 + COMPLETED 终态 + 合法/非法拦截 + 历史记录（含流转原因） + 乐观锁 | ✅ |
 | 澄清问题 | 创建/查询/解决 + HIGH 阻断 + 严重度分级 | ✅ |
-| 核心业务规则 | HIGH 未解决 → 阻断 READY/IN_DEVELOPMENT，回退不受影响 | ✅ |
+| 核心业务规则 | HIGH 未解决 → 阻断 READY/IN_DEVELOPMENT，回退不受影响，COMPLETED 为终态 | ✅ |
 | AI 分析 | DeepSeek 真实 API + Mock 回退，结构化返回 | ✅ |
-| 前端页面 | 全中文单页面，覆盖完整闭环 | ✅ |
+| 前端页面 | 全中文单页面，覆盖完整闭环（创建→流转→澄清→AI分析→删除），含登录注册页 | ✅ |
+| 用户认证 | JWT Token + BCrypt 加密 + 登录/注册接口 + 演示账号初始化 | ✅ |
 | 测试 | 63 用例，5 类测试，100% 通过 | ✅ |
-| 加分项 | Knife4j + Docker + Redis + 用户上下文 — 9/9 全做 | ✅ |
+| 加分项 | Knife4j + Docker + Redis + 用户上下文 + JWT 认证 + 删除功能 + COMPLETED 终态 — 全部完成 | ✅ |
 
 ## 2. 设计亮点
 
-1. **单一真相源状态机**：`WorkItemStatus` 枚举的 `getAllowedTargets()` 是唯一流转规则来源，前后端共享
+1. **单一真相源状态机**：`WorkItemStatus` 枚举的 `getAllowedTargets()` 是唯一流转规则来源，前后端共享；**COMPLETED 为终态**，不可再流转
 2. **AI 服务可插拔**：`AIAnalysisService` 接口 + `@ConditionalOnProperty`，Mock ↔ DeepSeek 一行配置切换
 3. **Redis 优雅降级**：启动时探测 Redis，不可用时自动回退 `ConcurrentMapCacheManager`，不影响业务
-4. **轻量用户上下文**：`X-User` 请求头 + `ThreadLocal`，零框架依赖，即插即用
-5. **乐观锁 + 统一错误码**：WF-001~005 涵盖所有异常场景，前端可按码分流处理
+4. **JWT + BCrypt 认证**：`sys_user` 表 + `/api/auth/register|login` + `JwtAuthFilter`，演示账号自动初始化，登录页持久化 token
+5. **乐观锁 + 统一错误码**：WF-001~007 涵盖所有异常场景，前端可按码分流处理
 
 ## 3. 可改进之处
 

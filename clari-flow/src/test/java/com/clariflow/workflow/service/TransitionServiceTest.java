@@ -195,18 +195,6 @@ class TransitionServiceTest {
 
             assertNotNull(result);
         }
-
-        @Test
-        @DisplayName("COMPLETED → TESTING (重新测试)")
-        void completedBackToTesting() {
-            WorkItem wi = createWorkItem("WI-001", WorkItemStatus.COMPLETED);
-            when(workItemMapper.selectById("WI-001")).thenReturn(wi);
-
-            TransitionRequest req = new TransitionRequest(WorkItemStatus.TESTING, "回归测试", "qa1");
-            WorkItemResponse result = transitionService.executeTransition("WI-001", req);
-
-            assertNotNull(result);
-        }
     }
 
     // ── Invalid Transitions ──
@@ -451,6 +439,18 @@ class TransitionServiceTest {
             when(workItemMapper.selectById("WI-001")).thenReturn(wi);
 
             TransitionRequest req = new TransitionRequest(WorkItemStatus.IN_DEVELOPMENT, "回退", "user1");
+            BusinessException ex = assertThrows(BusinessException.class,
+                    () -> transitionService.executeTransition("WI-001", req));
+            assertEquals(ErrorCode.WF_002, ex.getErrorCode());
+        }
+
+        @Test
+        @DisplayName("COMPLETED → TESTING (非法: 已完成是终态)")
+        void completedToTestingInvalid() {
+            WorkItem wi = createWorkItem("WI-001", WorkItemStatus.COMPLETED);
+            when(workItemMapper.selectById("WI-001")).thenReturn(wi);
+
+            TransitionRequest req = new TransitionRequest(WorkItemStatus.TESTING, "回归测试", "qa1");
             BusinessException ex = assertThrows(BusinessException.class,
                     () -> transitionService.executeTransition("WI-001", req));
             assertEquals(ErrorCode.WF_002, ex.getErrorCode());

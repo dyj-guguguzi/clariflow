@@ -3,13 +3,15 @@
 ## 1. 测试范围
 
 本次测试覆盖以下功能：
-- 工作项 CRUD API（创建/查询/更新）
-- 状态流转引擎（合法流转 + 非法流转 + 回退）
+- 工作项 CRUD API（创建/查询/更新/删除）
+- 状态流转引擎（合法流转 + 非法流转 + 回退 + COMPLETED 终态）
 - HIGH 级澄清问题阻断业务规则
 - 乐观锁版本冲突保护
 - 澄清问题 API（创建/列表/解决 + 输入校验）
 - AI 分析 API（成功/404/降级）
 - DeepSeek 真实 AI 调用
+- 用户认证 API（注册/登录）
+- Playwright E2E 浏览器端完整流程测试
 
 测试环境：
 - JDK 8 + Spring Boot Test + MockMvc
@@ -20,40 +22,39 @@
 
 | 规则 | 验证方式 | 结果 |
 |------|----------|------|
-| 合法状态流转 | TransitionServiceTest 测试 10 条合法路径（含回退） | ✅ 通过 |
-| 非法状态流转拦截 | TransitionServiceTest 测试 20 条非法路径，验证抛出 WF-002 | ✅ 通过 |
+| 合法状态流转 | TransitionServiceTest 测试 9 条合法路径（含回退） | ✅ 通过 |
+| 非法状态流转拦截 | TransitionServiceTest 测试 21 条非法路径，验证抛出 WF-002 | ✅ 通过 |
+| COMPLETED 终态 | TransitionServiceTest：COMPLETED → * 全部拦截，验证抛出 WF-002 | ✅ 通过 |
 | HIGH 澄清阻断 | ClarificationServiceTest：添加 HIGH 未解决 → 尝试 READY → 验证抛出 WF-003 | ✅ 通过 |
 | 澄清解决后放行 | ClarificationServiceTest：解决 HIGH 澄清 → 尝试 READY → 验证成功 | ✅ 通过 |
 | LOW 澄清不阻断 | ClarificationServiceTest：添加 LOW 未解决 → 尝试 READY → 验证成功 | ✅ 通过 |
 | 回退不受澄清影响 | ClarificationServiceTest：HIGH 未解决 → ANALYZING→DRAFT → 验证成功 | ✅ 通过 |
 | 乐观锁冲突 | WorkItemControllerTest：并发更新 → 验证 409 + WF-005 | ✅ 通过 |
+| 删除级联 | API 验证：DELETE 工作项 → 关联 clarification 和 transition 同步清除 | ✅ 通过 |
 
 ## 3. 状态流转测试
 
-### 合法流转（10 条路径）
+### 合法流转（9 条路径）
 ```
 DRAFT → ANALYZING
 ANALYZING → READY
 READY → IN_DEVELOPMENT
 IN_DEVELOPMENT → TESTING
 TESTING → COMPLETED
-COMPLETED → TESTING
 TESTING → IN_DEVELOPMENT
 IN_DEVELOPMENT → READY
 READY → ANALYZING
 ANALYZING → DRAFT
 ```
 
-全部通过 TransitionServiceTest 验证，状态变更正确，历史记录入库。
-
-### 非法流转（20 条路径）
+### 非法流转（21 条路径）
 ```
 DRAFT → READY, IN_DEVELOPMENT, TESTING, COMPLETED
 ANALYZING → IN_DEVELOPMENT, TESTING, COMPLETED
 READY → DRAFT, TESTING, COMPLETED
 IN_DEVELOPMENT → DRAFT, ANALYZING, COMPLETED
 TESTING → DRAFT, ANALYZING, READY
-COMPLETED → DRAFT, ANALYZING, READY, IN_DEVELOPMENT
+COMPLETED → DRAFT, ANALYZING, READY, IN_DEVELOPMENT, TESTING
 ```
 
 全部正确抛出 BusinessException(WF-002)。
@@ -97,5 +98,5 @@ COMPLETED → DRAFT, ANALYZING, READY, IN_DEVELOPMENT
 | 并发状态流转 | TransitionServiceTest 测试了版本冲突，但未测试真正并发场景 | 乐观锁机制已验证，生产环境可加集成压测 |
 | 大数据量列表性能 | 当前无分页，列表全量返回 | 生产迁移时加 MyBatis-Plus 分页插件 |
 | H2 文件损坏 | 文件持久化模式有数据损坏风险 | 定期备份 data/ 目录，生产迁移至 MySQL |
-| Mock AI 质量 | Mock 实现基于关键词规则 | 预留 AIAnalysisService 接口，替换为真实 LLM |
+| AI 服务不可用 | DeepSeek API 调用失败时依赖 @ConditionalOnMissingBean 的 Mock 备选 | 当前 Mock 备用已就绪，生产可接告警 |
 | 前端兼容性 | 仅开发阶段在 Chrome 测试 | 生产替换为 React/Vue 前端框架 |

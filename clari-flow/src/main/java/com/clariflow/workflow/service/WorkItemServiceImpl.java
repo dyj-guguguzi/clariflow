@@ -146,6 +146,23 @@ public class WorkItemServiceImpl implements WorkItemService {
         return toWorkItemResponse(updated);
     }
 
+    @Override
+    @CacheEvict(value = "workItems", allEntries = true)
+    public void deleteWorkItem(String id) {
+        findWorkItemById(id);
+
+        // Delete associated clarifications
+        clarificationMapper.delete(new LambdaQueryWrapper<Clarification>()
+                .eq(Clarification::getWorkItemId, id));
+
+        // Delete associated transitions
+        transitionMapper.delete(new LambdaQueryWrapper<WorkItemTransition>()
+                .eq(WorkItemTransition::getWorkItemId, id));
+
+        // Delete the work item
+        workItemMapper.deleteById(id);
+    }
+
     // ─── Helper methods ────────────────────────────────────────────
 
     /**

@@ -67,6 +67,8 @@
         .form-row .form-group { flex: 1; }
         .btn-primary { background: #1a73e8; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .btn-primary:hover { background: #1557b0; }
+        .btn-danger { background: #c62828; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+        .btn-danger:hover { background: #b71c1c; }
         .btn-secondary { background: #fff; color: #555; border: 1px solid #d0d0d0; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 100; justify-content: center; align-items: center; }
         .modal-overlay.show { display: flex; }
@@ -139,7 +141,7 @@
             <div class="form-group"><label>优先级</label><select id="createPriority"><option value="P0">P0</option><option value="P1" selected>P1</option><option value="P2">P2</option></select></div>
         </div>
         <div class="form-row">
-            <div class="form-group"><label>负责人</label><input type="text" id="createAssignee" placeholder="负责人姓名"></div>
+            <div class="form-group"><label>负责人</label><select id="createAssignee"><option value="">-- 不指定 --</option></select></div>
             <div class="form-group"><label>风险等级</label><select id="createRisk"><option value="LOW">低</option><option value="MEDIUM" selected>中</option><option value="HIGH">高</option></select></div>
         </div>
         <div class="form-group"><label>标签（逗号分隔）</label><input type="text" id="createTags" placeholder="例如：后端, 核心功能"></div>
@@ -156,7 +158,7 @@
     <div class="modal">
         <h3>状态流转确认</h3>
         <p style="margin-bottom:12px;color:#666;">从 <strong id="tmFrom"></strong> → <strong id="tmTo"></strong></p>
-        <div class="form-group"><label>操作人（可选，默认使用当前用户）</label><input type="text" id="tmOperator" placeholder="留空则使用当前用户"></div>
+        <p style="margin-bottom:12px;color:#888;font-size:0.85rem;">操作人：<strong id="tmCurrentUser"></strong></p>
         <div class="form-group"><label>流转原因</label><textarea id="tmReason" placeholder="可选，填写流转原因"></textarea></div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
             <button class="btn-secondary" onclick="closeTransitionModal()">取消</button>
@@ -175,6 +177,10 @@ const CN = {
     clarificationStatus: { UNRESOLVED: '未解决', RESOLVED: '已解决' }
 };
 function cn(map, key) { return map[key] || key; }
+
+// ── 认证信息 ──
+const token = localStorage.getItem('token');
+const currentUsername = localStorage.getItem('username');
 
 // ── API ──
 const API = '/api/work-items';
@@ -248,7 +254,10 @@ function renderDetail() {
     if (!wi) return;
     let html = `
         <div class="detail-section">
-            <h3>📋 ${esc(wi.title)}</h3>
+            <h3>
+                📋 ${esc(wi.title)}
+                <button class="btn-danger" onclick="deleteWorkItem('${wi.id}')" style="float:right;margin-top:-4px;">🗑 删除</button>
+            </h3>
             <div class="detail-field"><label>ID</label><span>${esc(wi.id)}</span></div>
             <div class="detail-field"><label>描述</label><span>${esc(wi.description) || '—'}</span></div>
             <div class="detail-field"><label>类型</label><span class="badge badge-${cn(CN.type, wi.type)}">${cn(CN.type, wi.type)}</span></div>
@@ -328,6 +337,7 @@ function renderDetail() {
                 <span class="badge badge-${cn(CN.status, t.fromStatus)}">${cn(CN.status, t.fromStatus)}</span>
                 → <span class="badge badge-${cn(CN.status, t.toStatus)}">${cn(CN.status, t.toStatus)}</span>
                 <span style="color:#888;margin-left:8px;">${t.operator || '—'}</span>
+                ${t.reason ? `<span style="color:#666;margin-left:8px;">「${esc(t.reason)}」</span>` : ''}
                 <span style="color:#aaa;margin-left:8px;">${t.createdAt || ''}</span>
             </div>`;
         });
@@ -343,8 +353,7 @@ function getAllowedTargets(status) {
         'ANALYZING': ['READY', 'DRAFT'],
         'READY': ['IN_DEVELOPMENT', 'ANALYZING'],
         'IN_DEVELOPMENT': ['TESTING', 'READY'],
-        'TESTING': ['COMPLETED', 'IN_DEVELOPMENT'],
-        'COMPLETED': ['TESTING']
+        'TESTING': ['COMPLETED', 'IN_DEVELOPMENT']
     };
     return map[status] || [];
 }
@@ -359,7 +368,7 @@ function openTransitionModal(target) {
     currentTransition = { target };
     document.getElementById('tmFrom').textContent = cn(CN.status, currentWorkItem.status);
     document.getElementById('tmTo').textContent = cn(CN.status, target);
-    document.getElementById('tmOperator').value = '';
+    document.getElementById('tmCurrentUser').textContent = currentUsername || 'anonymous';
     document.getElementById('tmReason').value = '';
     document.getElementById('transitionModal').classList.add('show');
 }
@@ -373,7 +382,7 @@ async function confirmTransition() {
         const body = {
             targetStatus: currentTransition.target,
             reason: document.getElementById('tmReason').value,
-            operator: document.getElementById('tmOperator').value || undefined
+            operator: currentUsername || undefined
         };
         currentWorkItem = await api('POST', API + '/' + currentWorkItem.id + '/transitions', body);
         closeTransitionModal();
@@ -439,8 +448,28 @@ async function triggerAIAnalysis() {
     }
 }
 
+// ── 用户列表（负责人下拉选择） ──
+let userList = [];
+async function loadUsers() {
+    try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        const res = await fetch('/api/users', { headers });
+        const json = await res.json();
+        if (json.code === 0 && json.data) {
+            userList = json.data;
+            const sel = document.getElementById('createAssignee');
+            sel.innerHTML = '<option value="">-- 不指定 --</option>' +
+                userList.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('');
+        }
+    } catch (e) { /* 静默失败，下拉保持空列表 */ }
+}
+
 // ── 创建工作项 ──
-function openCreateModal() { document.getElementById('createModal').classList.add('show'); }
+function openCreateModal() {
+    loadUsers();
+    document.getElementById('createModal').classList.add('show');
+}
 function closeCreateModal() { document.getElementById('createModal').classList.remove('show'); }
 async function createWorkItem() {
     const title = document.getElementById('createTitle').value.trim();
@@ -468,8 +497,23 @@ async function createWorkItem() {
     }
 }
 
+// ── 删除工作项 ──
+async function deleteWorkItem(id) {
+    if (!confirm('确定要删除工作项 ' + id + ' 吗？此操作不可撤销！')) return;
+    try {
+        await api('DELETE', API + '/' + id);
+        currentWorkItem = null;
+        document.getElementById('detailPanel').innerHTML = '<div class="detail-empty">👈 选择左侧工作项查看详情</div>';
+        loadList();
+        showToast('工作项已删除: ' + id, 'success');
+    } catch (e) {
+        showToast('删除失败: ' + e.message, 'error');
+    }
+}
+
 // ── 初始化 ──
 document.getElementById('displayUser').textContent = currentUsername || 'anonymous';
+loadUsers();
 loadList();
 
 function logout() {

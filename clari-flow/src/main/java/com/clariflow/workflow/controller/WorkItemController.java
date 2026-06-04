@@ -133,4 +133,18 @@ public class WorkItemController {
         List<TransitionResponse> responses = transitionService.getTransitionHistory(id);
         return ApiResponse.success(responses);
     }
+
+    /**
+     * Deletes a work item and all associated data.
+     *
+     * @param id the work item ID
+     * @return empty success response
+     */
+    @DeleteMapping("/{id}")
+    @Operation(summary = "删除工作项", description = "删除工作项及其关联的澄清问题和流转记录")
+    public ApiResponse<Void> deleteWorkItem(
+            @Parameter(description = "工作项ID") @PathVariable String id) {
+        workItemService.deleteWorkItem(id);
+        return ApiResponse.success(null);
+    }
 }

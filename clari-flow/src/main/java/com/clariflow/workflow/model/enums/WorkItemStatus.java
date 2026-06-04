@@ -18,7 +18,7 @@ import java.util.List;
  *   READY          → IN_DEVELOPMENT, ANALYZING
  *   IN_DEVELOPMENT → TESTING, READY
  *   TESTING        → COMPLETED, IN_DEVELOPMENT
- *   COMPLETED      → TESTING
+ *   COMPLETED      → (终态，不可再流转)
  * </pre>
  */
 public enum WorkItemStatus {
@@ -63,11 +63,11 @@ public enum WorkItemStatus {
         }
     },
 
-    /** Completed — work item has been fully delivered. */
+    /** Completed — work item has been fully delivered. Terminal state, no further transitions allowed. */
     COMPLETED {
         @Override
         public List<WorkItemStatus> getAllowedTargets() {
-            return Collections.singletonList(TESTING);
+            return Collections.emptyList();
         }
     };
 

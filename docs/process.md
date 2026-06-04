@@ -42,6 +42,7 @@
 **状态流转设计**：
 - 单一真相源：`WorkItemStatus` 枚举的 `getAllowedTargets()`
 - 流转校验 + HIGH 拦截 + 乐观锁 + 历史记录 → 一个 `@Transactional` 方法
+- COMPLETED 为终态：`getAllowedTargets()` 返回空列表，已完成项不可再流转
 
 ## 5. AI 使用过程
 
@@ -67,37 +68,47 @@
 5. **Knife4j doc.html 404**：`WebConfig.addResourceHandlers` 覆盖了 Spring Boot 默认的 `META-INF/resources/` 路径，导致 knife4j JAR 中静态资源不可达 → 移除自定义 resource handler，恢复默认行为
 6. **Maven 仓库写入权限**：系统 Maven `/opt/homebrew/` 目录无写权限 → 指定 `-Dmaven.repo.local=$HOME/.m2/repository`
 
-## 7. 验证记录
+## 7. 优化迭代记录（2026-06-04）
+
+1. **前端 localStorage 未初始化**：`index.html` 中 `token` 和 `currentUsername` 变量引用但未从 localStorage 读取 → 添加 `const token = localStorage.getItem('token')` 等初始化代码
+2. **缺少删除功能**：工作项无删除入口 → 全栈添加 DELETE /api/work-items/{id}，级联删除关联的 clarification 和 transition，前端详情面板添加红色删除按钮
+3. **DELETE 返回 204 导致前端 JSON 解析失败**：`@ResponseStatus(HttpStatus.NO_CONTENT)` 返回空响应体，前端 `res.json()` 报错 → 移除 204 注解，改为正常 200 返回 JSON
+4. **COMPLETED 非终态**：已完成工作项允许回退到 TESTING → 将 `COMPLETED.getAllowedTargets()` 改为 `Collections.emptyList()`，前端同步移除
+5. **流转历史不显示流转原因**：详情面板只显示状态/操作人/时间，缺少 reason 字段 → 添加 `「${esc(t.reason)}」` 显示
+
+## 8. 验证记录
 
 | 验证项 | 方式 | 结果 |
 |--------|------|------|
 | 编译 | `mvn clean compile -DskipTests` | BUILD SUCCESS |
 | 单元测试 | `mvn test` | 63/63 通过 |
-| API 手动验证 | curl 10 个端点 | 全部返回正确 |
+| API 手动验证 | curl 13 个端点（含 DELETE + Auth） | 全部返回正确 |
 | 业务规则验证 | 非法流转 → 422, HIGH 阻断 → 422, 解决后流转 → 200 | 全部符合预期 |
+| COMPLETED 终态验证 | COMPLETED → TESTING → 422 | 终态不可流转 ✅ |
 | DeepSeek AI | POST /ai-analysis | 真实 LLM 返回结构化分析 |
 | Redis 缓存 | 连续请求对比响应时间 | 315ms → 18ms（17x 提速） |
 | Knife4j 文档 | 浏览器访问 /doc.html | 200 原生 UI 正常渲染 |
 | 前端页面 | 浏览器访问 index.html | 全中文界面 200 |
 | Docker Compose | `docker compose up` | Redis + App 一键启动 |
+| Playwright E2E | 浏览器自动化：登录→创建→流转→查看历史→删除 | 全流程通过 |
 
-## 8. 取舍说明
+## 9. 取舍说明
 
-- **已完成**用户认证 → 已标注后续 Spring Security 扩展方向
+- **已完成**用户认证 → JWT Token + BCrypt 密码加密，`sys_user` 表 + `/api/auth/register|login` 接口，前端登录页面
+- **已完成**删除功能 → 全栈 DELETE 端点 + 级联删除 + 前端确认弹窗
 - **已完成**Docker Compose → Redis 7-alpine + App 容器编排
 - **已完成**真实 LLM 集成 → DeepSeek API，Mock 作为 `@ConditionalOnMissingBean` 备用
-- **已完成**用户上下文 → `X-User` 请求头 + `ThreadLocal` 轻量方案
+- **已完成**用户上下文 → X-User 请求头 + `ThreadLocal` 轻量方案，同时 JwtAuthFilter 解析 JWT 设置 UserContext
 - **未做**复杂前端看板 → 题目不强制要求，全中文原生 HTML 已覆盖核心演示
 - **未做**MySQL 迁移 → H2 MySQL 兼容模式，迁移仅需改配置
 
-## 9. 后续扩展路径
+## 10. 后续扩展路径
 
 ### 多人协作与权限控制
-当前通过 `X-User` 请求头 + `UserContext` 已具备用户识别能力。扩展路径：
-1. 添加 `sys_user` 表 + `sys_role` 表，建立 RBAC 模型
-2. 替换 `X-User` 为 JWT Token，由 Spring Security Filter 解析
-3. Controller 层添加 `@PreAuthorize` 注解控制操作权限
-4. `UserContext` 从 Token 中填充当前用户 ID、角色、权限集
+当前已实现 JWT + BCrypt 用户认证（`sys_user` 表、`/api/auth/register|login`、`JwtAuthFilter`）。扩展路径：
+1. 添加 `sys_role` 表，建立 RBAC 模型
+2. Controller 层添加 `@PreAuthorize` 注解控制操作权限（如仅 ADMIN 可删除工作项）
+3. 区分管理员（admin）和普通用户（pm）的角色权限
 
 ### 专业前端扩展
 当前原生 HTML 通过 Fetch API 调用 10 个 REST 端点。专业前端需要的额外 API：

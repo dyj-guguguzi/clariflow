@@ -14,9 +14,10 @@ API 文档入口：
 
 | 模块 | 路径前缀 | 说明 |
 |------|----------|------|
-| WorkItem | `/api/work-items` | 工作项 CRUD + 状态流转 |
+| WorkItem | `/api/work-items` | 工作项 CRUD + 状态流转 + 删除 |
 | Clarification | `/api/work-items/{workItemId}/clarifications` | 澄清问题管理 |
 | AI Analysis | `/api/work-items/{workItemId}/ai-analysis` | AI 分析触发 |
+| Auth | `/api/auth` | 用户注册/登录，JWT Token 签发 |
 
 采用 REST 风格：资源路径表示实体，HTTP 方法表示操作。
 
@@ -28,12 +29,15 @@ API 文档入口：
 | 查询列表 | GET `/api/work-items?type=&priority=&status=` | 可选筛选参数 | ApiResponse\<List\<ListItem\>\> | 按更新时间 DESC 排序 |
 | 查询详情 | GET `/api/work-items/{id}` | — | ApiResponse\<WorkItemResponse\> | 含 clarifications, transitions, aiAnalysis |
 | 更新工作项 | PUT `/api/work-items/{id}` | WorkItemUpdateRequest(含 version) | ApiResponse\<WorkItemResponse\> | 乐观锁校验 |
+| 删除工作项 | DELETE `/api/work-items/{id}` | — | ApiResponse\<Void\> | 级联删除关联的 clarification 和 transition |
 | 状态流转 | POST `/api/work-items/{id}/transitions` | TransitionRequest | ApiResponse\<WorkItemResponse\> | 状态机核心 |
-| 流转历史 | GET `/api/work-items/{id}/transitions` | — | ApiResponse\<List\<TransitionResponse\>\> | 按时间排序 |
+| 流转历史 | GET `/api/work-items/{id}/transitions` | — | ApiResponse\<List\<TransitionResponse\>\> | 按时间排序，含流转原因 |
 | 新增澄清 | POST `/api/work-items/{workItemId}/clarifications` | ClarificationCreateRequest | ApiResponse\<ClarificationResponse\> | severity: HIGH/MEDIUM/LOW |
 | 查询澄清 | GET `/api/work-items/{workItemId}/clarifications` | — | ApiResponse\<List\<ClarificationResponse\>\> | 按创建时间排序 |
 | 解决澄清 | PUT `/api/work-items/{workItemId}/clarifications/{clarificationId}/resolve` | ClarificationResolveRequest | ApiResponse\<ClarificationResponse\> | status→RESOLVED, 记录 resolvedAt |
 | AI 分析 | POST `/api/work-items/{workItemId}/ai-analysis` | — | ApiResponse\<AIAnalysisResponse\> | 返回 summary + risks + suggestions |
+| 用户注册 | POST `/api/auth/register` | RegisterRequest | ApiResponse\<LoginResponse\> | BCrypt 加密, 返回 JWT |
+| 用户登录 | POST `/api/auth/login` | LoginRequest | ApiResponse\<LoginResponse\> | 返回 JWT token + 角色信息 |
 
 ### 统一响应格式
 
