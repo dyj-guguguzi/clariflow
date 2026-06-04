@@ -8,6 +8,7 @@ import com.clariflow.workflow.model.dto.response.ClarificationResponse;
 import com.clariflow.workflow.model.enums.ClarificationStatus;
 import com.clariflow.workflow.model.enums.Severity;
 import com.clariflow.workflow.repository.ClarificationMapper;
+import com.clariflow.workflow.repository.UserMapper;
 import com.clariflow.workflow.repository.WorkItemMapper;
 import com.clariflow.workflow.repository.WorkItemTransitionMapper;
 import com.clariflow.workflow.service.ClarificationService;
@@ -57,6 +58,9 @@ class ClarificationControllerTest {
 
     @MockBean
     private ClarificationMapper clarificationMapper;
+
+    @MockBean
+    private UserMapper userMapper;
 
     @MockBean
     private WorkItemTransitionMapper workItemTransitionMapper;

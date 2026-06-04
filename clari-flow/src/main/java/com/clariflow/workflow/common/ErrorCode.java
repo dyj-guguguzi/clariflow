@@ -29,7 +29,13 @@ public enum ErrorCode {
     WF_004(404, "WF-004", "澄清问题不存在"),
 
     /** Version conflict — optimistic lock failure (409). */
-    WF_005(409, "WF-005", "版本冲突，请重试");
+    WF_005(409, "WF-005", "版本冲突，请重试"),
+
+    /** Username already exists (409). */
+    WF_006(409, "WF-006", "用户名已存在"),
+
+    /** Invalid username or password (401). */
+    WF_007(401, "WF-007", "用户名或密码错误");
 
     private final int httpStatus;
     private final String code;

@@ -5,6 +5,7 @@ import com.clariflow.workflow.common.exception.BusinessException;
 import com.clariflow.workflow.model.dto.response.AIAnalysisResponse;
 import com.clariflow.workflow.model.enums.Severity;
 import com.clariflow.workflow.repository.ClarificationMapper;
+import com.clariflow.workflow.repository.UserMapper;
 import com.clariflow.workflow.repository.WorkItemMapper;
 import com.clariflow.workflow.repository.WorkItemTransitionMapper;
 import com.clariflow.workflow.service.AIAnalysisService;
@@ -53,6 +54,9 @@ class AIAnalysisControllerTest {
 
     @MockBean
     private ClarificationMapper clarificationMapper;
+
+    @MockBean
+    private UserMapper userMapper;
 
     @MockBean
     private WorkItemTransitionMapper workItemTransitionMapper;

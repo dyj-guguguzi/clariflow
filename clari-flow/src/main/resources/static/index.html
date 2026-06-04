@@ -87,9 +87,8 @@
 <header>
     <h1>ClariFlow — 工作项状态流转</h1>
     <div style="display:flex;align-items:center;gap:12px;">
-        <input type="text" id="currentUser" placeholder="当前用户" value="pm"
-               style="padding:6px 10px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:0.85rem;width:100px;"
-               title="设置当前操作人，将作为 X-User 请求头发送">
+        <span style="font-size:0.85rem;opacity:0.9;">👤 <strong id="displayUser"></strong></span>
+        <a href="#" onclick="logout()" style="color:#fff;font-size:0.8rem;opacity:0.7;">退出</a>
         <button onclick="openCreateModal()">+ 新建工作项</button>
     </div>
 </header>
@@ -179,13 +178,9 @@ function cn(map, key) { return map[key] || key; }
 
 // ── API ──
 const API = '/api/work-items';
-function getCurrentUser() {
-    return document.getElementById('currentUser').value.trim() || 'anonymous';
-}
 async function api(method, url, body) {
     const headers = { 'Content-Type': 'application/json' };
-    const user = getCurrentUser();
-    if (user) headers['X-User'] = user;
+    if (token) headers['Authorization'] = 'Bearer ' + token;
     const opts = { method, headers };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
@@ -474,7 +469,14 @@ async function createWorkItem() {
 }
 
 // ── 初始化 ──
+document.getElementById('displayUser').textContent = currentUsername || 'anonymous';
 loadList();
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    window.location.href = '/login.html';
+}
 </script>
 
 </body>

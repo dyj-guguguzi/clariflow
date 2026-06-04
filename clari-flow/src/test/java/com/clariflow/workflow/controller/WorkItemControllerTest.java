@@ -10,6 +10,7 @@ import com.clariflow.workflow.model.enums.Severity;
 import com.clariflow.workflow.model.enums.WorkItemStatus;
 import com.clariflow.workflow.model.enums.WorkItemType;
 import com.clariflow.workflow.repository.ClarificationMapper;
+import com.clariflow.workflow.repository.UserMapper;
 import com.clariflow.workflow.repository.WorkItemMapper;
 import com.clariflow.workflow.repository.WorkItemTransitionMapper;
 import com.clariflow.workflow.service.TransitionService;
@@ -68,6 +69,9 @@ class WorkItemControllerTest {
 
     @MockBean
     private ClarificationMapper clarificationMapper;
+
+    @MockBean
+    private UserMapper userMapper;
 
     // ── Helper to build mock WorkItemResponse ──
 

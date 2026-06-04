@@ -42,3 +42,13 @@ CREATE TABLE IF NOT EXISTS clarification (
     resolved_at     TIMESTAMP,
     CONSTRAINT fk_clarification_work_item FOREIGN KEY (work_item_id) REFERENCES work_item(id)
 );
+
+-- SysUser table
+CREATE TABLE IF NOT EXISTS sys_user (
+    id              BIGINT          AUTO_INCREMENT PRIMARY KEY,
+    username        VARCHAR(50)     NOT NULL UNIQUE,
+    password        VARCHAR(200)    NOT NULL,
+    email           VARCHAR(100),
+    role            VARCHAR(20)     NOT NULL DEFAULT 'USER',
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
